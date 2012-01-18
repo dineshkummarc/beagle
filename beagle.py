@@ -17,6 +17,7 @@ APP_SECRET_KEY = str(os.environ.get("APP_SECRET_KEY"))
 REDIS_HOST = str(os.environ.get("REDIS_HOST"))
 REDIS_DB = int(os.environ.get("REDIS_DB"))
 REDIS_PORT = int(os.environ.get("REDIS_PORT"))
+DEBUG = os.environ.get("DEBUG")
 
 # initialize the things
 
@@ -114,4 +115,4 @@ def logout():
     return redirect(url_for('hello'))
     
 if __name__ == "__main__":
-    app.run(debug=True, port=PORT, host='0.0.0.0')
+    app.run(debug=DEBUG, port=PORT, host='0.0.0.0')
