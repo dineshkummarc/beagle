@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>The Beagle CRM</title>
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link href="/static/bootstrap.min.css" rel="stylesheet">
+    <script src="http://code.jquery.com/jquery-1.7.min.js"></script>
+    <script src="/static/bootstrap-alerts.js"></script>
+    <style type="text/css">
+      body {
+        padding-top: 60px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="topbar">
+      <div class="topbar-inner">
+        <div class="container">
+          <a class="brand" href="#">Beagle</a>
+        </div>
+      </div>
+    </div>
+    <div class="container">
+    <div class="row">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <ul class="flashes span12 offset2">
+        {% for category, message in messages %}
+          <div class="alert-message fade in {{ category }}" data-alert="alert">
+             <a class="close" href="#">×</a>
+             <p>{{ message }}</p>
+          </div>
+        {% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
+    </div>
+    </div>
+    <div class="container">
+      <div class="hero-unit">
+        <h1>Bark, bark!</h1>
+        <p>The Beagle is a simple tool for keeping track of leads as a group.</p>
+        <p><a class="btn primary large" href="/login">Log-in</a></p>
+      </div>
+      <footer>
+        <p>May the Beagle be with you. <a style="float: right;" href="http://git.io/knnb3A">Nerd Stuff</a></p>
+      </footer>
+    </div>
+  </body>
+</html>
