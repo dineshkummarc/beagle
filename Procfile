@@ -1,1 +1,1 @@
-web: python beagle.py
+web: python -u beagle.py

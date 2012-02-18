@@ -1,90 +1,22 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <title>Beagle</title>
-    <meta name="description" content="">
-    <meta name="author" content="">
-    <link href="/static/bootstrap.min.css" rel="stylesheet">
-    <script src="http://code.jquery.com/jquery-1.7.min.js"></script>
-    <script src="/static/bootstrap-alerts.js"></script>
-    <script src="/static/bootstrap-dropdown.js"></script>
-    <script src="/static/bootstrap-tabs.js"></script>
-    <script src="/static/jquery.tablesorter.min.js"></script>
-    <style type="text/css">
-      body {
-        padding-top: 60px;
-      }
-    </style>
-    <script >
-    $(function() {
-      $("table#leads").tablesorter({ sortList: [[1,0]] });
-    });
-    </script>
-  </head>
-  <body>
-    <div class="topbar">
-      <div class="topbar-inner">
-        <div class="container">
-          <a class="brand" href="#">Beagle</a>
-          <ul class="nav">
-            <form class="pull-left" action="">
-              <input type="text" name="query" placeholder="Game, Developer or Email">
-            </form>
-          </ul>
-          <ul class="nav secondary-nav">
-            <li class="dropdown" data-dropdown="dropdown">
-              <a href="#" class="dropdown-toggle">Settings</a>
-              <ul class="dropdown-menu">
-                <li><a href="/logout">Logout</a></li>
-              </ul>
-            </li>
-          </ul>
-        </div>
-      </div>
-    </div>
-        <div class="container">
-    <div class="row">
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        <ul class="flashes span12 offset2">
-        {% for category, message in messages %}
-          <div class="alert-message fade in {{ category }}" data-alert="alert">
-             <a class="close" href="#">×</a>
-             <p>{{ message }}</p>
-          </div>
-        {% endfor %}
-        </ul>
-      {% endif %}
-    {% endwith %}
-    </div>
-    </div>
-    <div class="container span16">
-    <div class="results">
-      <table class="leads" id="leads" class="zebra-striped">
-      <thead>
-            <tr>
-              <th class="green">Developer</th>
-              <th class="yellow">Game</th>
-              <th class="red">Email</th>
-              <th class="blue">Owner</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td><a href="/lead"></a>Kiip</td>
-              <td>7x7</td>
-              <td><a href="mailto:hello@kiip.me">hello@kiip.me</a></td>
-              <td><a href="/owner?name=Jack">Jack Pearkes</a></td>
-            </tr>
-          </tbody>
-      </table>
-    </div>
-    </div>
-    <div class="container">
-      <footer>
-        <p>May the Beagle be with you.</p>
-      </footer>
-    </div>
-  </body>
-</html>
+{% extends "layout.html" %}
+{% block title %}Results{% endblock %}
+{% block content %}
+        <table id="leads" class="table table-striped table-bordered table-condensed">
+            <thead>
+                  <tr>
+                    <th class="green">Developer</th>
+                    <th class="yellow">Game</th>
+                    <th class="red">Email</th>
+                    <th class="blue">Owner</th>
+                  </tr>
+            </thead>
+            <tbody>
+                  <tr>
+                    <td><a href="/lead"></a>Kiip</td>
+                    <td>7x7</td>
+                    <td><a href="mailto:hello@kiip.me">hello@kiip.me</a></td>
+                    <td><a href="/owner?name=Jack">Jack Pearkes</a></td>
+                  </tr>
+            </tbody>
+          </table>
+{% endblock %}

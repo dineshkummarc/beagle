@@ -1,6 +1,4 @@
 Flask==0.8
-redis==2.4.10
 Flask-OAuth==0.11
 oauth2==1.5.211
-Flask-Redis==0.2
-redisco==0.1.4
+Flask-SQLAlchemy==0.15

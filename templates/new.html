@@ -1,0 +1,16 @@
+{% extends "layout.html" %}
+{% block title %}Add a Lead{% endblock %}
+{% block content %}
+      <form class="well form-vertical" autocomplete="off" action="{{ url_for('add') }}" method=POST>
+      <label><h4>Add a new Lead</h4></label>
+        <input type="text" name="developer" class="span3" placeholder="En Masse LLC"><span class="help-inline">Developer</span>
+        <br>
+        <input type="text" name="games" class="span3" placeholder="7x7, KiipSake"><span class="help-inline">Name of the games, comma separated.</span>
+        <br>
+        <input type="email" name="email" class="span3" placeholder="jack@kiip.me"><span class="help-inline">Email Address</span>
+        <br>
+        <input type="text" name="name" class="span3" placeholder="Jack Pearkes"><span class="help-inline">Human Name</span>
+        <br>
+        <button type="submit" class="btn">Submit</button>
+        </form>
+{% endblock %}

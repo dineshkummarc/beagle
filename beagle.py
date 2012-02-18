@@ -1,10 +1,11 @@
 import os
-import redisco
 import base64
+import uuid
+import datetime
 from flask import Flask, request, redirect, url_for, session, flash, g, render_template
 from flaskext.oauth import OAuth
-from flaskext.redis import redis
-from redisco import models
+from flaskext.sqlalchemy import SQLAlchemy
+from sqlalchemy.exc import IntegrityError
 
 # environment variables
 
@@ -14,27 +15,44 @@ FACEBOOK_CONSUMER = str(os.environ.get("FACEBOOK_CONSUMER"))
 FACEBOOK_CALLBACK = str(os.environ.get("FACEBOOK_CALLBACK"))
 PORT = int(os.environ.get("PORT", 5000))
 APP_SECRET_KEY = str(os.environ.get("APP_SECRET_KEY"))
-REDIS_HOST = str(os.environ.get("REDIS_HOST"))
-REDIS_DB = int(os.environ.get("REDIS_DB"))
-REDIS_PORT = int(os.environ.get("REDIS_PORT"))
 DEBUG = os.environ.get("DEBUG")
+DATABASE_URL=str(os.environ.get("DATABASE_URL"))
 
 # initialize the things
 
 app = Flask(__name__)
 oauth = OAuth()
 app.secret_key = APP_SECRET_KEY
-redisco.connection_setup(host=REDIS_HOST, port=REDIS_PORT, db=REDIS_DB)
-r = redis.Redis(host=REDIS_HOST, port=REDIS_PORT, db=REDIS_DB)
+app.config.from_object(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
+db = SQLAlchemy(app)
 
 # base model
 
-class Lead(models.Model):
-    ident = models.Attribute(required=True, unique=True, indexed=True)
-    name = models.Attribute(required=True, unique=True)
-    owner = models.Attribute(required=True)
-    games = models.ListField(str)
-    created_at = models.DateTimeField(auto_now_add=True)   
+class Lead(db.Model):
+    ident = db.Column(db.String(80), primary_key=True)
+    developer = db.Column(db.String(80), unique=False)
+    name = db.Column(db.String(80), unique=False)
+    email = db.Column(db.String(80), unique=True)
+    owner = db.Column(db.String(80), unique=False)
+    games = db.Column(db.String(160), unique=False)
+    pubdate = db.Column(db.DateTime)
+    
+    def __init__(self, developer, name, email, owner, games, pubdate=None, ident=None):
+        self.developer = developer
+        self.name = name
+        self.email = email
+        self.owner = owner
+        self.games = str(games)
+        if pubdate is None:
+            self.pubdate = datetime.datetime.utcnow()
+        if ident is None:
+            self.ident = str(uuid.uuid4()).replace('-', '')
+
+        
+    def __repr__(self):
+        return '<IDENT: %r NAME: %r OWNER: %r GAMES: %r>' % (self.ident, self.name, self.owner, self.games)
+
 
 # oauth settings (this can be pretty easily swapped out for twitter/github/etc.)
 
@@ -71,19 +89,32 @@ def owner():
     print request.args['name']
     return render_template('results.html')
 
-@app.route("/add")
+@app.route("/add", methods=['POST'])
 def add():
     if request.method == 'POST':
-        game = []
+        developer = request.form['developer']
+        games = request.form['games']
         name = request.form['name']
-        game = request.form['games']
-        ident = base64.urlsafe_b64encode(name)
-        owner = session['facebook_user'][0]
+        email = request.form['email']
+        owner = session['facebook_user'][1]
+        lead = Lead(developer=developer, name=name, email=email, owner=owner, games=games)
         try:
-            foo = 'bar'
-        except Exception:
-            flash('',  'warning')
-        flash('', 'success')
+            db.session.add(lead)
+            db.session.commit()
+            flash(u'Your lead was succesfully saved as <strong><a href=\"/lead/%s\">%s</a></strong>. It\'s automatically been assigned to you.' % (lead.ident, developer), 'alert-success')            
+        except IntegrityError:
+            flash('Looks like <strong>%s</strong> was a duplicate. Search results are below!' % email, 'alert-warning')            
+            return redirect('%s?query=%s' % (url_for('search'), email))
+        return redirect(url_for('new'))
+
+@app.route("/new")
+def new():
+    return render_template('new.html')
+
+@app.route("/lead/<ident>")
+def lead(ident):
+    lead = Lead.query.filter_by(ident=ident).first_or_404()
+    return render_template('lead.html', lead=lead)
 
 @app.route('/login/authorized')
 @facebook.authorized_handler
@@ -98,10 +129,10 @@ def facebook_authorized(resp):
     safe_users = SAFE_USERS
     check_users = bool(me.data['id'] in SAFE_USERS)
     if check_users == False:
-        flash(u'Access denied: You are not authorized to use this application.', 'error')
+        flash(u'Access denied: You are not authorized to use this application.', 'alert-error')
         return redirect(url_for('hello'))
     session['facebook_user'] = [me.data['id'], me.data['name']]
-    flash(u'Welcome %s, you can begin by searching above for duplicate leads.' % me.data['name'], 'success')
+    flash(u'Welcome %s, you can begin by searching above for duplicate leads.' % me.data['name'], 'alert-success')
     return redirect(url_for('hello'))
     
 @app.route('/login')
@@ -111,7 +142,10 @@ def login():
 
 @app.route('/logout')
 def logout():
-    session.pop('facebook_user')
+    try:
+        session.pop('facebook_user')
+    except:
+        flash(u"Looks like you tried to logout when you weren't logged in. Whoops!", 'alert-error')
     return redirect(url_for('hello'))
     
 if __name__ == "__main__":
