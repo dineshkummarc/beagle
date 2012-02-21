@@ -147,6 +147,19 @@ def logout():
     except:
         flash(u"Looks like you tried to logout when you weren't logged in. Whoops!", 'alert-error')
     return redirect(url_for('hello'))
+
+def configure_raven(app):
+    import os
+    import traceback
+    if 'SENTRY_DSN' in os.environ:
+        try:
+            from raven.contrib.flask import Sentry
+            return Sentry(app)
+        except Exception, e:
+            print "Unexpected error:", e
+            traceback.print_exc()
+
+sentry = configure_raven(app)
     
 if __name__ == "__main__":
     app.run(debug=DEBUG, port=PORT, host='0.0.0.0')
