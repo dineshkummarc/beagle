@@ -6,6 +6,7 @@ from flask import Flask, request, redirect, url_for, session, flash, g, render_t
 from flaskext.oauth import OAuth
 from flaskext.sqlalchemy import SQLAlchemy
 from sqlalchemy.exc import IntegrityError
+from functools import wraps
 
 # environment variables
 
@@ -17,6 +18,7 @@ PORT = int(os.environ.get("PORT", 5000))
 APP_SECRET_KEY = str(os.environ.get("APP_SECRET_KEY"))
 DEBUG = os.environ.get("DEBUG")
 DATABASE_URL=str(os.environ.get("DATABASE_URL"))
+RATINGS_MULTIPLIER=str(os.environ.get("RATINGS_MULTIPLIER"))
 
 # initialize the things
 
@@ -36,19 +38,29 @@ class Lead(db.Model):
     email = db.Column(db.String(80), unique=True)
     owner = db.Column(db.String(80), unique=False)
     games = db.Column(db.String(160), unique=False)
-    pubdate = db.Column(db.DateTime)
+    status = db.Column(db.String(80), unique=False)
+    ratings = db.Column(db.Integer, unique=False)
+    dau = db.Column(db.Integer, unique=False)
+    age = db.Column(db.String(80), unique=False)
+    gender = db.Column(db.String(80), unique=False)
+    pubdate = db.Column(db.DateTime, unique=False)
     
-    def __init__(self, developer, name, email, owner, games, pubdate=None, ident=None):
+    def __init__(self, developer, name, email, owner, games, status, ratings, age, gender, dau=None, pubdate=None, ident=None):
         self.developer = developer
         self.name = name
         self.email = email
         self.owner = owner
         self.games = str(games)
+        self.status = status
+        self.ratings = ratings
+        self.age = age
+        self.gender = gender
+        if dau is None:
+            self.dau = float(ratings) * float(RATINGS_MULTIPLIER)
         if pubdate is None:
             self.pubdate = datetime.datetime.utcnow()
         if ident is None:
             self.ident = str(uuid.uuid4()).replace('-', '')
-
         
     def __repr__(self):
         return '<IDENT: %r NAME: %r OWNER: %r GAMES: %r>' % (self.ident, self.name, self.owner, self.games)
@@ -65,9 +77,28 @@ facebook = oauth.remote_app('facebook',
     consumer_secret=FACEBOOK_SECRET
 )
 
+# decorators
+
+def auth_required(role):
+    def decorator(f):
+        @wraps(f)
+        def inner(*a, **kw):
+            if not session.get('facebook_user'):
+                flash(u'<strong>Access denied:</strong> You must be logged in to use this application.', 'alert-error')
+                return redirect(url_for('hello'))
+            elif session['facebook_user'][0] in SAFE_USERS:
+                return f(*a, **kw)
+            else:
+                flash('<strong>Access denied:</strong> You must be logged in to use this application.', 'alert-error')
+                return redirect(url_for('hello'))
+        return inner
+    return decorator
+    
 @facebook.tokengetter
 def get_facebook_oauth_token():
     return session.get('oauth_token')
+
+# views
 
 @app.route("/")
 def hello():
@@ -80,24 +111,31 @@ def hello():
     return render_template('index.html', user_name=user_name, user_id=user_id)
 
 @app.route("/search")
+@auth_required('user')
 def search():
     print request.args['query']
     return render_template('results.html')
 
 @app.route("/owner")
+@auth_required('user')
 def owner():
     print request.args['name']
     return render_template('results.html')
 
 @app.route("/add", methods=['POST'])
+@auth_required('user')
 def add():
     if request.method == 'POST':
         developer = request.form['developer']
         games = request.form['games']
-        name = request.form['name']
         email = request.form['email']
+        name = request.form['name']
+        status = request.form['status']
+        ratings = request.form['ratings']
+        age = request.form['age']
+        gender = request.form['gender']    
         owner = session['facebook_user'][1]
-        lead = Lead(developer=developer, name=name, email=email, owner=owner, games=games)
+        lead = Lead(developer=developer, name=name, email=email, games=games, status=status, ratings=ratings, age=age, gender=gender, owner=owner)
         try:
             db.session.add(lead)
             db.session.commit()
@@ -108,10 +146,12 @@ def add():
         return redirect(url_for('new'))
 
 @app.route("/new")
+@auth_required('user')
 def new():
     return render_template('new.html')
 
 @app.route("/lead/<ident>")
+@auth_required('user')
 def lead(ident):
     lead = Lead.query.filter_by(ident=ident).first_or_404()
     return render_template('lead.html', lead=lead)
