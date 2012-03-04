@@ -2,31 +2,20 @@ import os
 import base64
 import uuid
 import datetime
+import settings
 from flask import Flask, request, redirect, url_for, session, flash, g, render_template
 from flaskext.oauth import OAuth
 from flaskext.sqlalchemy import SQLAlchemy
 from sqlalchemy.exc import IntegrityError
 from functools import wraps
 
-# environment variables
-
-SAFE_USERS = os.environ.get("SAFE_USERS")
-FACEBOOK_SECRET = str(os.environ.get("FACEBOOK_SECRET"))
-FACEBOOK_CONSUMER = str(os.environ.get("FACEBOOK_CONSUMER"))
-FACEBOOK_CALLBACK = str(os.environ.get("FACEBOOK_CALLBACK"))
-PORT = int(os.environ.get("PORT", 5000))
-APP_SECRET_KEY = str(os.environ.get("APP_SECRET_KEY"))
-DEBUG = os.environ.get("DEBUG")
-DATABASE_URL=str(os.environ.get("DATABASE_URL"))
-RATINGS_MULTIPLIER=str(os.environ.get("RATINGS_MULTIPLIER"))
-
 # initialize the things
 
 app = Flask(__name__)
 oauth = OAuth()
-app.secret_key = APP_SECRET_KEY
+app.secret_key = settings.APP_SECRET_KEY
 app.config.from_object(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
+app.config['SQLALCHEMY_DATABASE_URI'] = settings.DATABASE_URL
 db = SQLAlchemy(app)
 
 # base model
@@ -56,7 +45,7 @@ class Lead(db.Model):
         self.age = age
         self.gender = gender
         if dau is None:
-            self.dau = float(ratings) * float(RATINGS_MULTIPLIER)
+            self.dau = float(ratings) * float(settings.RATINGS_MULTIPLIER)
         if pubdate is None:
             self.pubdate = datetime.datetime.utcnow()
         if ident is None:
@@ -73,8 +62,8 @@ facebook = oauth.remote_app('facebook',
     request_token_url=None,
     access_token_url='/oauth/access_token',
     authorize_url='https://www.facebook.com/dialog/oauth',
-    consumer_key=FACEBOOK_CONSUMER,
-    consumer_secret=FACEBOOK_SECRET
+    consumer_key=settings.FACEBOOK_CONSUMER,
+    consumer_secret=settings.FACEBOOK_SECRET
 )
 
 # decorators
@@ -86,7 +75,7 @@ def auth_required(role):
             if not session.get('facebook_user'):
                 flash(u'<strong>Access denied:</strong> You must be logged in to use this application.', 'alert-error')
                 return redirect(url_for('hello'))
-            elif session['facebook_user'][0] in SAFE_USERS:
+            elif session['facebook_user'][0] in settings.SAFE_USERS:
                 return f(*a, **kw)
             else:
                 flash('<strong>Access denied:</strong> You must be logged in to use this application.', 'alert-error')
@@ -166,8 +155,8 @@ def facebook_authorized(resp):
         )
     session['oauth_token'] = (resp['access_token'], '')
     me = facebook.get('/me')
-    safe_users = SAFE_USERS
-    check_users = bool(me.data['id'] in SAFE_USERS)
+    safe_users = settings.SAFE_USERS
+    check_users = bool(me.data['id'] in settings.SAFE_USERS)
     if check_users == False:
         flash(u'Access denied: You are not authorized to use this application.', 'alert-error')
         return redirect(url_for('hello'))
@@ -177,7 +166,7 @@ def facebook_authorized(resp):
     
 @app.route('/login')
 def login():
-    return facebook.authorize(callback=FACEBOOK_CALLBACK + url_for('facebook_authorized',
+    return facebook.authorize(callback=settings.FACEBOOK_CALLBACK + url_for('facebook_authorized',
         next=url_for('hello')))
 
 @app.route('/logout')
@@ -202,4 +191,4 @@ def configure_raven(app):
 sentry = configure_raven(app)
     
 if __name__ == "__main__":
-    app.run(debug=DEBUG, port=PORT, host='0.0.0.0')
+    app.run(debug=settings.DEBUG, port=settings.PORT, host='0.0.0.0')
