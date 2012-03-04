@@ -1,15 +1,30 @@
 {% extends "layout.html" %}
 {% block title %}{{ lead.developer }}{% endblock %}
 {% block content %}
-<table id="leads" class="table table-bordered table-condensed">
-  <tbody>
-        <tr>
-          <td><a href="/lead/{{ lead.ident }}">{{ lead.developer }}</a></td>
-          <td>{{ lead.games }}</td>
-          <td>{{ lead.name }}</td>
-          <td><a href="mailto:{{ lead.email }}">{{ lead.email }}</a></td>
-          <td><a href="/owner?name={{ lead.owner }}">{{ lead.owner }}</a></td>
-        </tr>
-  </tbody>
-</table>
+<div class="row">
+  <div class="about span9">
+    <h1 class="muted">{{ lead.developer }}</h1>
+    <h6>Contact: <strong>{{ lead.name }}</strong></h6>
+    <h6>Email: <strong><a href="mailto:{{ lead.email }}">{{ lead.email }}</a></strong></h6>
+  </div>
+  <div class="quickstats span3 pull-right">
+    <h4>Owned by <a href="/owner?name={{ lead.owner }}">{{ lead.owner }}</a></h4>
+  </div>
+</div>
+<div class="row">
+  <div class="games span12">
+    <div class="page-header">
+    <h1>Games</h1>
+    </div>
+    <h3><a href="http://ax.search.itunes.apple.com/WebObjects/MZSearch.woa/wa/search?entity=software&media=all&restrict=true&submit=seeAllLockups&term={{ lead.games }}">{{ lead.games }}</a></h3>
+    <h4><span class="muted">Gender:</span> <strong>{{ lead.gender }}</strong></h4>
+    <h4><span class="muted">Age:</span> <strong>{{ lead.age }}</strong></h4>
+    <h4><span class="muted">DAU:</span> <strong>{{ lead.dau }}</strong></h4>
+    <h4><span class="muted">Status:</span> <span class="label label-success">{{ lead.status }}</span></h4>
+    <br>
+    <div class="progress progress-danger progress-striped active">
+      <div class="bar" style="width: {{ funnel_status }}%;"></div>
+    </div>
+  </div>
+</div>
 {% endblock %}

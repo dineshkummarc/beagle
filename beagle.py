@@ -143,8 +143,10 @@ def new():
 @auth_required('user')
 def lead(ident):
     lead = Lead.query.filter_by(ident=ident).first_or_404()
-    return render_template('lead.html', lead=lead)
-
+    funnel = {'Dormant': '0', 'Inital Discussion': '20', 'Delayed Integration': '50', 'Integrating' : '80', 'Testing': '90', 'Live': '100'}
+    funnel_status = funnel[lead.status]
+    return render_template('lead.html', lead=lead, funnel_status=funnel_status)
+    
 @app.route('/login/authorized')
 @facebook.authorized_handler
 def facebook_authorized(resp):
