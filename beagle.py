@@ -19,9 +19,14 @@ app.config['SQLALCHEMY_DATABASE_URI'] = settings.DATABASE_URL
 db = SQLAlchemy(app)
 
 # base model
+# todo
+
+class User(db.Model):
+    id = db.Column(db.String(36), primary_key=True)
+    name = db.Column(db.String(160))
 
 class Lead(db.Model):
-    ident = db.Column(db.String(80), primary_key=True)
+    id = db.Column(db.String(36), primary_key=True)
     developer = db.Column(db.String(80), unique=False)
     name = db.Column(db.String(80), unique=False)
     email = db.Column(db.String(80), unique=True)
@@ -34,7 +39,7 @@ class Lead(db.Model):
     gender = db.Column(db.String(80), unique=False)
     pubdate = db.Column(db.DateTime, unique=False)
     
-    def __init__(self, developer, name, email, owner, games, status, ratings, age, gender, dau=None, pubdate=None, ident=None):
+    def __init__(self, developer, name, email, owner, games, status, ratings, age, gender, dau=None, pubdate=None, id=None):
         self.developer = developer
         self.name = name
         self.email = email
@@ -48,11 +53,11 @@ class Lead(db.Model):
             self.dau = float(ratings) * float(settings.RATINGS_MULTIPLIER)
         if pubdate is None:
             self.pubdate = datetime.datetime.utcnow()
-        if ident is None:
-            self.ident = str(uuid.uuid4()).replace('-', '')
+        if id is None:
+            self.id = str(uuid.uuid4()).replace('-', '')
         
     def __repr__(self):
-        return '<IDENT: %r NAME: %r OWNER: %r GAMES: %r>' % (self.ident, self.name, self.owner, self.games)
+        return '<ID: %r NAME: %r OWNER: %r GAMES: %r>' % (self.id, self.name, self.owner, self.games)
 
 
 # oauth settings (this can be pretty easily swapped out for twitter/github/etc.)
@@ -128,7 +133,7 @@ def add():
         try:
             db.session.add(lead)
             db.session.commit()
-            flash(u'Your lead was succesfully saved as <strong><a href=\"/lead/%s\">%s</a></strong>. It\'s automatically been assigned to you.' % (lead.ident, developer), 'alert-success')            
+            flash(u'Your lead was succesfully saved as <strong><a href=\"/lead/%s\">%s</a></strong>. It\'s automatically been assigned to you.' % (lead.id, developer), 'alert-success')            
         except IntegrityError:
             flash('Looks like <strong>%s</strong> was a duplicate. Search results are below!' % email, 'alert-warning')            
             return redirect('%s?query=%s' % (url_for('search'), email))
@@ -139,10 +144,10 @@ def add():
 def new():
     return render_template('new.html')
 
-@app.route("/lead/<ident>")
+@app.route("/lead/<id>")
 @auth_required('user')
-def lead(ident):
-    lead = Lead.query.filter_by(ident=ident).first_or_404()
+def lead(id):
+    lead = Lead.query.filter_by(id=id).first_or_404()
     funnel = {'Dormant': '0', 'Inital Discussion': '20', 'Delayed Integration': '50', 'Integrating' : '80', 'Testing': '90', 'Live': '100'}
     funnel_status = funnel[lead.status]
     return render_template('lead.html', lead=lead, funnel_status=funnel_status)
