@@ -7,6 +7,7 @@ from flask import Flask, request, redirect, url_for, session, flash, g, render_t
 from flaskext.oauth import OAuth
 from flaskext.sqlalchemy import SQLAlchemy
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy import desc
 from functools import wraps
 
 # initialize the things
@@ -43,7 +44,7 @@ class Lead(db.Model):
     created = db.Column(db.DateTime, default=datetime.datetime.utcnow(), index=True)
     user_id = db.Column(db.String(36), db.ForeignKey('user.id'))
     
-    user = db.relationship(User, backref='leads')
+    user = db.relationship(User, backref='leads', lazy='joined')
     
     def __init__(self, developer=developer, name=name, email=email, user_id=user_id, id=None):
         self.developer = developer
@@ -65,7 +66,7 @@ class Game(db.Model):
     modified = db.Column(db.DateTime, default=datetime.datetime.utcnow(), onupdate=datetime.datetime.utcnow(), index=True)
     created = db.Column(db.DateTime, default=datetime.datetime.utcnow(), index=True)
 
-    lead = db.relationship(Lead, backref='games')
+    lead = db.relationship(Lead, backref='games', lazy='joined')
     
     def __init__(self, name=name, lead_id=lead_id, status=status, ratings=ratings, age=age, gender=gender, dau=None, id=None):
         self.name = name
@@ -113,18 +114,21 @@ def get_facebook_oauth_token():
 
 @app.route("/")
 def index():
-    
-    #Lead.query(Lead).options(joinedload('user')).all()
+    lead_query = Lead.query.order_by(Lead.created)
+    leads = lead_query.limit(10).all()
+    games = Game.query.order_by(Game.created).limit(10).all()
+    user = lead_query.join(User)
     if not session.get('user'):
         return render_template('login.html')
-    return render_template('index.html')
+    return render_template('index.html', leads=leads, games=games)
 
 @app.route("/search")
 @auth_required('user')
 def search():
-    query = request.args['query']
-    
-    return render_template('results.html')
+    query = str(request.args['query'])
+    leads = Lead.query.filter_by(developer=Lead.developer.like(query)).all()
+    games = Game.query.filter_by(name=query).all()
+    return render_template('search.html', leads=leads, games=games)
 
 @app.route("/add/lead", methods=['POST'])
 @auth_required('user')

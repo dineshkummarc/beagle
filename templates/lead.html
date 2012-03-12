@@ -26,7 +26,7 @@
       <h4><span class="muted">DAU:</span> <strong>{{ game.dau }}</strong></h4>
       <h4><span class="muted">Status:</span> <span class="label label-success">{{ game.status }}</span></h4>
       <br>
-      <div class="progress progress-success progress-striped active">
+      <div class="progress progress-info progress-striped">
         <div class="bar" style="width:{% if game.status == 'Initial Discussion' %}20%{% elif game.status == 'Delayed Integration' %}50%{% elif game.status == 'Integrating' %}70%{% elif game.status == 'Testing' %}90%{% elif game.status == 'Live' %}100%{% else %}0%{% endif %};"></div>
       </div>
     </div>

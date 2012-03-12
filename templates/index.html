@@ -17,7 +17,7 @@
               <tbody>
                     <tr>
                       <td><a href="/lead/{{ lead.id }}">{{ lead.developer }}</a></td>
-                      <td><a href="/user/{{ user.id }}">{{ user.name }}</a></td>
+                      <td><a href="/user/{{ lead.user_id }}">{{ lead.user_id }}</a></td>
                     </tr>
               </tbody>
               {% endfor %}
@@ -32,14 +32,14 @@
              <thead>
                    <tr>
                      <th class="green">Game</th>
-                     <th class="yellow">Owner</th>
+                     <th class="yellow">Lead</th>
                    </tr>
              </thead>
              {% for game in games %}
              <tbody>
                    <tr>
                      <td><a href="/lead/{{ game.lead_id }}">{{ game.name }}</a></td>
-                     <td><a href="/user/{{ user.id }}">{{ user.name }}</a></td>
+                     <td><a href="/user/{{ game.lead_id }}">{{ game.lead_id }}</a></td>
                    </tr>
              </tbody>
              {% endfor %}
