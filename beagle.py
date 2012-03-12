@@ -39,19 +39,17 @@ class Lead(db.Model):
     developer = db.Column(db.String(80), index=True)
     name = db.Column(db.String(80), index=True)
     email = db.Column(db.String(80), unique=True, index=True)
-    create_date = db.Column(db.DateTime)
-    modify_date = db.Column(db.DateTime)
+    modified = db.Column(db.DateTime, default=datetime.datetime.utcnow(), onupdate=datetime.datetime.utcnow(), index=True)
+    created = db.Column(db.DateTime, default=datetime.datetime.utcnow(), index=True)
     user_id = db.Column(db.String(36), db.ForeignKey('user.id'))
     
     user = db.relationship(User, backref='leads')
     
-    def __init__(self, developer=developer, name=name, email=email, user_id=user_id, pubdate=None, id=None):
+    def __init__(self, developer=developer, name=name, email=email, user_id=user_id, id=None):
         self.developer = developer
         self.name = name
         self.email = email
         self.user_id = user_id
-        if pubdate is None:
-            self.pubdate = datetime.datetime.utcnow()
         if id is None:
             self.id = str(uuid.uuid4()).replace('-', '')
 
@@ -64,12 +62,12 @@ class Game(db.Model):
     dau = db.Column(db.Integer)
     age = db.Column(db.String(80))
     gender = db.Column(db.String(80))
-    create_date = db.Column(db.DateTime)
-    modify_date = db.Column(db.DateTime)
+    modified = db.Column(db.DateTime, default=datetime.datetime.utcnow(), onupdate=datetime.datetime.utcnow(), index=True)
+    created = db.Column(db.DateTime, default=datetime.datetime.utcnow(), index=True)
 
     lead = db.relationship(Lead, backref='games')
     
-    def __init__(self, name=name, lead_id=lead_id, status=status, ratings=ratings, age=age, gender=gender, dau=None, pubdate=None, id=None):
+    def __init__(self, name=name, lead_id=lead_id, status=status, ratings=ratings, age=age, gender=gender, dau=None, id=None):
         self.name = name
         self.lead_id = lead_id
         self.status = status
@@ -78,8 +76,6 @@ class Game(db.Model):
         self.age = age
         if dau is None:
             self.dau = float(self.ratings) * float(settings.RATINGS_MULTIPLIER)
-        if pubdate is None:
-            self.pubdate = datetime.datetime.utcnow()
         if id is None:
             self.id = str(uuid.uuid4()).replace('-', '')
             
@@ -118,7 +114,7 @@ def get_facebook_oauth_token():
 @app.route("/")
 def index():
     
-    Lead.query(Lead).options(joinedload('user')).all()
+    #Lead.query(Lead).options(joinedload('user')).all()
     if not session.get('user'):
         return render_template('login.html')
     return render_template('index.html')
@@ -176,14 +172,14 @@ def new():
 @app.route("/lead/<id>")
 @auth_required('user')
 def lead(id):
-    lead = Lead.query.filter_by(id=id).first_or_404()
+    lead = Lead.query.get_or_404(id)
     user = User.query.get(lead.user_id)
     return render_template('lead.html', lead=lead, user=user)
 
 @app.route("/user/<id>")
 @auth_required('user')
 def user(id):
-    user = User.query.filter_by(id=id).first_or_404()
+    user = User.query.get_or_404(id)
     return render_template('results.html', user=user)
 
     

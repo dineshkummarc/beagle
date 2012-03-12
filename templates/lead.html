@@ -2,13 +2,15 @@
 {% block title %}{{ lead.developer }}{% endblock %}
 {% block content %}
 <div class="row">
-  <div class="about span9">
+  <div class="about span8">
     <h1 class="muted"><a href="http://ax.search.itunes.apple.com/WebObjects/MZSearch.woa/wa/search?entity=software&amp;media=all&amp;restrict=true&amp;submit=seeAllLockups&amp;term={{ lead.developer }}">{{ lead.developer }}</a></h1>
     <h6>Contact: <strong>{{ lead.name }}</strong></h6>
     <h6>Email: <strong><a href="mailto:{{ lead.email }}">{{ lead.email }}</a></strong></h6>
   </div>
-  <div class="quickstats span3 pull-right">
+  <div class="quickstats span4 pull-right">
     <h4>Owned by <a href="/user/{{ user.id }}">{{ user.name }}</a></h4>
+    <h6>Created on {{ lead.created }}</h6>
+    <h6>Last Modified {{ lead.modified }}</h6>
   </div>
 </div>
 <div class="row">
