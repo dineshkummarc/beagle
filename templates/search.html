@@ -21,7 +21,7 @@
             <td><a href="/lead/{{ lead.id }}">{{ lead.developer }}</a></td>
             <td>{% for game in lead.games %}<a href="/lead/{{ lead.id }}#{{ game.id }}">{{ game.name }}</a>, {% endfor %}</td>
             <td><a href="mailto:{{ lead.email }}">{{ lead.email }}</a></td>
-            <td><a href="/user/{{ lead.user_id }}">{{ lead.user_id }}</a></td>
+            <td><a href="/user/{{ lead.user_id }}">{{ lead.user.name }}</a></td>
           </tr>
     </tbody>
 {% endfor %}

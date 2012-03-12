@@ -8,6 +8,7 @@ from flaskext.oauth import OAuth
 from flaskext.sqlalchemy import SQLAlchemy
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy import desc
+from sqlalchemy.orm import joinedload
 from functools import wraps
 
 # initialize the things
@@ -114,20 +115,27 @@ def get_facebook_oauth_token():
 
 @app.route("/")
 def index():
-    lead_query = Lead.query.order_by(Lead.created)
+    lead_query = Lead.query.order_by(Lead.created).options(joinedload('user'))
     leads = lead_query.limit(10).all()
-    games = Game.query.order_by(Game.created).limit(10).all()
-    user = lead_query.join(User)
+    game_query = Game.query.order_by(Game.created).options(joinedload('lead.user'))
+    games = game_query.limit(10).all()
+    users = User.query.all()
     if not session.get('user'):
         return render_template('login.html')
-    return render_template('index.html', leads=leads, games=games)
+    return render_template('index.html', leads=leads, games=games, users=users)
 
 @app.route("/search")
 @auth_required('user')
 def search():
     query = str(request.args['query'])
-    leads = Lead.query.filter_by(developer=Lead.developer.like(query)).all()
-    games = Game.query.filter_by(name=query).all()
+    lead_query = Lead.query.order_by(Lead.created).options(joinedload('user'))
+    leads = lead_query.limit(10).all()
+    leads = Lead.query.filter(Lead.developer.like("%" + query + "%")).all()
+    leads += Lead.query.filter(Lead.email.like("%" + query + "%")).all()
+    leads += Lead.query.filter(Lead.name.like("%" + query + "%")).all()
+    unq_leads = dict([(l.id, l) for l in leads])
+    leads = unq_leads.values()
+    games = Game.query.filter(Game.name.like("%" + query + "%")).all()
     return render_template('search.html', leads=leads, games=games)
 
 @app.route("/add/lead", methods=['POST'])
