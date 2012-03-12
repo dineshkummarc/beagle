@@ -3,12 +3,12 @@
 {% block content %}
 <div class="row">
   <div class="about span9">
-    <h1 class="muted">{{ lead.developer }}</h1>
+    <h1 class="muted"><a href="http://ax.search.itunes.apple.com/WebObjects/MZSearch.woa/wa/search?entity=software&amp;media=all&amp;restrict=true&amp;submit=seeAllLockups&amp;term={{ lead.developer }}">{{ lead.developer }}</a></h1>
     <h6>Contact: <strong>{{ lead.name }}</strong></h6>
     <h6>Email: <strong><a href="mailto:{{ lead.email }}">{{ lead.email }}</a></strong></h6>
   </div>
   <div class="quickstats span3 pull-right">
-    <h4>Owned by <a href="/owner?name={{ lead.owner }}">{{ lead.owner }}</a></h4>
+    <h4>Owned by <a href="/user/{{ user.id }}">{{ user.name }}</a></h4>
   </div>
 </div>
 <div class="row">
@@ -16,14 +16,57 @@
     <div class="page-header">
     <h1>Games</h1>
     </div>
-    <h3><a href="http://ax.search.itunes.apple.com/WebObjects/MZSearch.woa/wa/search?entity=software&media=all&restrict=true&submit=seeAllLockups&term={{ lead.games }}">{{ lead.games }}</a></h3>
-    <h4><span class="muted">Gender:</span> <strong>{{ lead.gender }}</strong></h4>
-    <h4><span class="muted">Age:</span> <strong>{{ lead.age }}</strong></h4>
-    <h4><span class="muted">DAU:</span> <strong>{{ lead.dau }}</strong></h4>
-    <h4><span class="muted">Status:</span> <span class="label label-success">{{ lead.status }}</span></h4>
+    {% for game in lead.games %}
+    <div id="{{ game.id }}">
+      <h3><a href="http://ax.search.itunes.apple.com/WebObjects/MZSearch.woa/wa/search?entity=software&amp;media=all&amp;restrict=true&amp;submit=seeAllLockups&amp;term={{ game.name }}">{{ game.name }}</a></h3>
+      <h4><span class="muted">Gender:</span> <strong>{{ game.gender }}</strong></h4>
+      <h4><span class="muted">Age:</span> <strong>{{ game.age }}</strong></h4>
+      <h4><span class="muted">DAU:</span> <strong>{{ game.dau }}</strong></h4>
+      <h4><span class="muted">Status:</span> <span class="label label-success">{{ game.status }}</span></h4>
+      <br>
+      <div class="progress progress-success progress-striped active">
+        <div class="bar" style="width:{% if game.status == 'Initial Discussion' %}20%{% elif game.status == 'Delayed Integration' %}50%{% elif game.status == 'Integrating' %}70%{% elif game.status == 'Testing' %}90%{% elif game.status == 'Live' %}100%{% else %}0%{% endif %};"></div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+<div class="row">
+  <div class="add span12">
+    <button class="btn-success btn" data-toggle="collapse" data-target="#add">Add Game</button>
+    <div id="add" class="collapse">
     <br>
-    <div class="progress progress-danger progress-striped active">
-      <div class="bar" style="width: {{ funnel_status }}%;"></div>
+      <form class="well form-vertical" autocomplete="off" action="{{ url_for('add_game') }}" method=POST>
+        <label><h4>Add a new Game</h4></label>
+          <input type="hidden" name="lead_id" class="span3" value="{{ lead.id }}">
+          <br>
+          <input type="text" name="name" class="span3" placeholder="7x7"><span class="help-inline muted">Name of the game.</span>
+          <br>
+          <select data-placeholder="Select a status..." name="status">
+            <option value="Inital Discussion">Inital Discussion</option> 
+            <option value="Delayed Integration">Delayed Integration</option> 
+            <option value="Integrating">Integrating</option> 
+            <option value="Testing">Testing</option> 
+            <option value="Live">Live</option> 
+            <option value="Dormant">Dormant</option> 
+          </select><span class="help-inline muted">Where are they at?</span>
+          <br>
+          <input type="text" name="ratings" class="span3" placeholder="1500"><span class="help-inline muted">Number of Ratings</span>
+          <br>
+          <select data-placeholder="Select an age range..." name="age">
+            <option value="13-20">13-17</option> 
+            <option value="22-35">18-25</option> 
+            <option value="35-55">26-34</option> 
+            <option value="55+">35-50+</option> 
+          </select><span class="help-inline muted">Age range</span>
+          <br>
+          <select data-placeholder="Select a majority gender..." name="gender">
+            <option value="Male">Male</option> 
+            <option value="Female">Female</option> 
+          </select><span class="help-inline muted">Majority gender of players</span>
+          <br>
+          <button type="submit" class="btn">Submit</button>
+        </form>
     </div>
   </div>
 </div>
