@@ -115,20 +115,25 @@ def get_facebook_oauth_token():
 
 @app.route("/")
 def index():
-    lead_query = Lead.query.order_by(Lead.created).options(joinedload('user'))
+    lead_query = Lead.query.order_by(Lead.created)
     leads = lead_query.limit(10).all()
-    game_query = Game.query.order_by(Game.created).options(joinedload('lead.user'))
+    game_query = Game.query.order_by(Game.created)
     games = game_query.limit(10).all()
     users = User.query.all()
     if not session.get('user'):
         return render_template('login.html')
     return render_template('index.html', leads=leads, games=games, users=users)
 
+@app.route("/browse")
+@auth_required('user')
+def browse():
+    return render_template('browse.html')
+
 @app.route("/search")
 @auth_required('user')
 def search():
     query = str(request.args['query'])
-    lead_query = Lead.query.order_by(Lead.created).options(joinedload('user'))
+    lead_query = Lead.query.order_by(Lead.created)
     leads = lead_query.limit(10).all()
     leads = Lead.query.filter(Lead.developer.like("%" + query + "%")).all()
     leads += Lead.query.filter(Lead.email.like("%" + query + "%")).all()
@@ -150,11 +155,33 @@ def add_lead():
         try:
             db.session.add(lead)
             db.session.commit()
-            flash(u'Your lead was succesfully saved as <strong><a href=\"/lead/%s\">%s</a></strong>. It\'s automatically been assigned to you.' % (lead.id, lead.developer), 'alert-success')            
+            flash(u'Your lead was succesfully saved as <strong><a href=\"/lead/%s\">%s</a></strong>. It\'s automatically been assigned to you. Add a game below.' % (lead.id, lead.developer), 'alert-success')            
         except IntegrityError:
             flash('Looks like <strong>%s</strong> was a duplicate. Search results are below!' % email, 'alert-warning')            
             return redirect('%s?query=%s' % (url_for('search'), email))
-        return redirect(url_for('new'))
+        return redirect('/new/game/%s' % lead.id)
+
+@app.route("/update/lead", methods=['POST'])
+@auth_required('user')
+def update_lead():
+    if request.method == 'POST':
+        lead_id = request.form['lead_id']
+        developer = request.form['developer']
+        email = request.form['email']
+        name = request.form['name']
+        user_id = session['user']
+        lead = Lead.query.get(lead_id)
+        lead.developer = developer
+        lead.email = email
+        lead.name = name
+        lead.user_id = user_id
+        try:
+            db.session.commit()
+            flash(u'Your lead was succesfully updated as <strong><a href=\"/lead/%s\">%s</a></strong>.' % (lead.id, lead.developer), 'alert-success')            
+        except IntegrityError:
+            flash('Looks like <strong>%s</strong> was a duplicate. Search results are below!' % email, 'alert-warning')            
+            return redirect('%s?query=%s' % (url_for('search'), email))
+        return redirect('/lead/%s' % lead.id)
 
 @app.route("/add/game", methods=['POST'])
 @auth_required('user')
@@ -175,11 +202,61 @@ def add_game():
             flash('Something went wrong! We couldn\'t add your game!', 'alert-danger')
         return redirect(url_for('lead', id=lead_id))
 
-
-@app.route("/new")
+@app.route("/update/game", methods=['POST'])
 @auth_required('user')
-def new():
-    return render_template('new.html')
+def update_game():
+    if request.method == 'POST':
+        lead_id = request.form['lead_id']
+        game_id = request.form['game_id']
+        name = request.form['name']
+        status = request.form['status']
+        ratings = request.form['ratings']
+        age = request.form['age']
+        gender = request.form['gender']
+        game = Game.query.get(game_id)
+        game.name = name
+        game.status = status
+        game.ratings = ratings
+        game.age = age
+        game.gender = gender
+        try:
+            db.session.commit()
+            flash(u'Your game was succesfully updated as <strong><a href=\"/lead/%s\">%s</a></strong>.' % (lead_id, game.name), 'alert-success')            
+        except IntegrityError:
+            flash('Something went wrong! We couldn\'t add your game!', 'alert-danger')
+        return redirect(url_for('lead', id=lead_id))
+
+@app.route("/delete/game/<id>")
+@auth_required('user')
+def delete_game(id):
+    game = Game.query.get(id)
+    try:
+        db.delete(game)
+        db.session.commit()
+        db.session.flush()
+        flash(u'The game %s was succesfully deleted' % (game.name), 'alert-danger')            
+    except:
+        flash('Something went wrong! We couldn\'t delete your game!', 'alert-danger')
+    return redirect(url_for('index'))
+
+@app.route("/new/game/<id>")
+@auth_required('user')
+def new_game(id):
+    lead = Lead.query.get_or_404(id)
+    return render_template('new_game.html', lead=lead)
+
+@app.route("/new/lead")
+@auth_required('user')
+def new_lead():
+    return render_template('new_lead.html')
+
+@app.route("/lead/<id>/edit")
+@auth_required('user')
+def edit_lead(id):
+    lead = Lead.query.get_or_404(id)
+    user = User.query.get(lead.user_id)
+    users = User.query.all()
+    return render_template('edit_lead.html', lead=lead, users=users, user=user)
 
 @app.route("/lead/<id>")
 @auth_required('user')

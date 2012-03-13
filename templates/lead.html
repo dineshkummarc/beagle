@@ -8,6 +8,7 @@
     <h6>Email: <strong><a href="mailto:{{ lead.email }}">{{ lead.email }}</a></strong></h6>
   </div>
   <div class="quickstats span4 pull-right">
+    <a class="btn pull-right" href="/lead/{{ lead.id }}/edit">Edit</a>
     <h4>Owned by <a href="/user/{{ user.id }}">{{ user.name }}</a></h4>
     <h6>Created on {{ lead.created }}</h6>
     <h6>Last Modified {{ lead.modified }}</h6>
@@ -53,7 +54,7 @@
             <option value="Dormant">Dormant</option> 
           </select><span class="help-inline muted">Where are they at?</span>
           <br>
-          <input type="text" name="ratings" class="span3" placeholder="1500"><span class="help-inline muted">Number of Ratings</span>
+          <input type="text" name="ratings" class="span3" placeholder="1500"><span class="help-inline muted">Number of Ratings. (DAU == Ratings * 1.8)</span>
           <br>
           <select data-placeholder="Select an age range..." name="age">
             <option value="13-20">13-17</option> 
@@ -67,7 +68,8 @@
             <option value="Female">Female</option> 
           </select><span class="help-inline muted">Majority gender of players</span>
           <br>
-          <button type="submit" class="btn">Submit</button>
+        <button type="submit" class="btn btn-primary">Submit</button>
+        <a href="#" class="btn" data-toggle="collapse" data-target="#add">Cancel</a>
         </form>
     </div>
   </div>

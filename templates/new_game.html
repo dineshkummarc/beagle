@@ -1,0 +1,36 @@
+{% extends "layout.html" %}
+{% block title %}Add a Game{% endblock %}
+{% block content %}
+      <form class="well form-vertical" autocomplete="off" action="{{ url_for('add_game') }}" method=POST>
+      <label><h4>Add a Game to {{ lead.developer }}</h4></label>
+        <input type="hidden" name="lead_id" class="span3" value="{{ lead.id }}">
+        <br>
+        <input type="text" name="name" class="span3" placeholder="7x7"><span class="help-inline muted">Name of the game.</span>
+        <br>
+        <select data-placeholder="Select a status..." name="status">
+          <option value="Initial Discussion">Initial Discussion</option> 
+          <option value="Delayed Integration">Delayed Integration</option> 
+          <option value="Integrating">Integrating</option> 
+          <option value="Testing">Testing</option> 
+          <option value="Live">Live</option> 
+          <option value="Dormant">Dormant</option> 
+        </select><span class="help-inline muted">Where are they at?</span>
+        <br>
+        <input type="text" name="ratings" class="span3" placeholder="1500"><span class="help-inline muted">Number of Ratings</span>
+        <br>
+        <select data-placeholder="Select an age range..." name="age">
+          <option value="13-20">13-17</option> 
+          <option value="22-35">18-25</option> 
+          <option value="35-55">26-34</option> 
+          <option value="55+">35-50+</option> 
+        </select><span class="help-inline muted">Age range</span>
+        <br>
+        <select data-placeholder="Select a majority gender..." name="gender">
+          <option value="Male">Male</option> 
+          <option value="Female">Female</option> 
+        </select><span class="help-inline muted">Majority gender of players</span>
+        <br>
+        <button type="submit" class="btn btn-primary">Submit</button>
+        <a href="/" class="btn">Cancel</a>
+      </form>
+{% endblock %}

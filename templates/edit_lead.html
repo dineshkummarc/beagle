@@ -1,0 +1,119 @@
+{% extends "layout.html" %}
+{% block title %}{{ lead.developer }}{% endblock %}
+{% block content %}
+<div class="row">
+  <div class="leads span12">
+      <form class="well form-vertical" autocomplete="off" action="{{ url_for('update_lead') }}" method=POST>
+      <label><h4>Edit Lead</h4></label>
+        <input type="hidden" name="lead_id" class="span3" value="{{ lead.id }}">
+        <input type="text" name="developer" class="span3" value="{{ lead.developer }}"><span class="help-inline muted">Developer</span>
+        <br>
+        <input type="email" name="email" class="span3" value="{{ lead.email }}"><span class="help-inline muted">Email Address</span>
+        <br>
+        <input type="text" name="name" class="span3" value="{{ lead.name }}"><span class="help-inline muted">Human Name</span>
+        <br>
+        <select name="user_id">
+        {% for user in users %}
+          <option value="{{ user.id }}">{{ user.name }}</option> 
+        {% endfor %}
+        </select><span class="help-inline muted">Lead Owner</span>
+        <br>
+        <button type="submit" class="btn btn-primary">Send Changes</button>
+        <a href="/lead/{{ lead.id }}" class="btn">Cancel</a>
+      </form>
+  </div>
+</div>
+<div class="row">
+  <div class="games span12">
+    <div class="page-header">
+    <h1>Games</h1>
+    </div>
+    {% for game in lead.games %}
+    <div id="{{ game.id }}">
+      <form class="well form-vertical" autocomplete="off" action="{{ url_for('update_game') }}" method=POST>
+      <a href="/delete/game/{{ game.id }}" class="btn btn-danger pull-right">Delete Game</a>
+      <label><h4>Edit Game</h4></label>
+        <input type="hidden" name="lead_id" class="span3" value="{{ lead.id }}">
+        <input type="hidden" name="game_id" class="span3" value="{{ game.id }}">
+        <br>
+        <input type="text" name="name" class="span3" value="{{ game.name }}"><span class="help-inline muted">Name</span>
+        <br>
+        <select name="status" value="{{ game.status }}">
+        {% if game.status == 'Initial Discussion' %}
+          <option value="Initial Discussion" selected='selected'>Initial Discussion</option> 
+        {% else %}
+          <option value="Initial Discussion">Initial Discussion</option> 
+        {% endif %}
+        {% if game.status == 'Delayed Integration' %}
+          <option value="Delayed Integration" selected='selected'>Delayed Integration</option> 
+        {% else %}
+          <option value="Delayed Integration">Delayed Integration</option> 
+        {% endif %}
+        {% if game.status == 'Integrating' %}
+          <option value="Integrating" selected='selected'>Integrating</option> 
+        {% else %}
+          <option value="Integrating">Integrating</option> 
+        {% endif %}
+        {% if game.status == 'Testing' %}
+          <option value="Testing" selected='selected'>Testing</option> 
+        {% else %}
+          <option value="Testing">Testing</option> 
+        {% endif %}
+        {% if game.status == 'Live' %}
+          <option value="Live" selected='selected'>Live</option> 
+        {% else %}
+          <option value="Live">Live</option> 
+        {% endif %}
+        {% if game.status == 'Dormant' %}
+          <option value="Dormant" selected='selected'>Dormant</option> 
+        {% else %}
+          <option value="Dormant">Dormant</option> 
+        {% endif %}
+        </select><span class="help-inline muted">Status</span>
+        <br>
+        <input type="text" name="ratings" class="span3" value="{{ (game.dau / 1.8) }}"><span class="help-inline muted">Ratings</span>
+        <br>
+        <select name="age" value={{ game.age }}>
+        {% if game.age == '13-17' %}
+          <option value="13-17" selected="selected">13-17</option> 
+        {% else %}
+          <option value="13-17">13-17</option> 
+        {% endif %}
+        {% if game.age == '18-35' %}
+          <option value="18-35" selected="selected">18-35</option> 
+        {% else %}
+          <option value="18-35">18-35</option> 
+        {% endif %}
+        {% if game.age == '35-55' %}
+          <option value="35-55" selected="selected">35-55</option> 
+        {% else %}
+          <option value="35-55">35-55</option> 
+        {% endif %}
+        {% if game.age == '55+' %}
+          <option value="55+" selected="selected">55+</option> 
+        {% else %}
+          <option value="55+">55+</option> 
+        {% endif %}
+        </select><span class="help-inline muted">Age</span>
+        <br>
+        <select name="gender" value="{{ game.gender }}">
+        {% if game.gender == 'Male' %}
+          <option value="Male" selected="selected">Male</option> 
+        {% else %}
+          <option value="Male">Male</option> 
+        {% endif %}
+        {% if game.gender == 'Female' %}
+          <option value="Female" selected="selected">Female</option> 
+        {% else %}
+          <option value="Female">Female</option> 
+        {% endif %}
+        </select><span class="help-inline muted">Gender</span>
+        <br>
+        <button type="submit" class="btn btn-primary">Send Changes</button>
+        <a href="/lead/{{ lead.id }}" class="btn">Cancel</a>
+      </form>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}
