@@ -37,8 +37,8 @@
              {% for game in games %}
              <tbody>
                    <tr>
-                     <td><a href="/lead/{{ game.lead_id }}">{{ game.name }}</a></td>
-                     <td><a href="/user/{{ game.lead_id }}">{{ game.lead.developer }}</a></td>
+                     <td><a href="/lead/{{ game.lead_id }}#{{ game.id }}">{{ game.name }}</a></td>
+                     <td><a href="/lead/{{ game.lead_id }}">{{ game.lead.developer }}</a></td>
                    </tr>
              </tbody>
              {% endfor %}
@@ -65,4 +65,5 @@
              {% endfor %}
         </table>
   </div>
+</div>
 {% endblock %}
