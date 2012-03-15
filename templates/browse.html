@@ -1,5 +1,65 @@
 {% extends "layout.html" %}
 {% block title %}Browse Games{% endblock %}
 {% block content %}
-
+      <form class="well form-vertical" autocomplete="off" action="{{ url_for('browse') }}" method=GET>
+      <label><h4>Sort Games</h4></label>
+        <select data-placeholder="Select an age range..." name="age">
+       	  <option value="">None</option>
+          <option value="13-20">13-20</option>
+          <option value="22-35">22-35</option>
+          <option value="35-55">35-55</option>
+          <option value="55+">55+</option>
+        </select><span class="help-inline muted">Age range</span>
+        <br><br>
+        <select data-placeholder="Select a majority gender..." name="gender">
+          <option value="">None</option>
+          <option value="Male">Male</option>
+          <option value="Female">Female</option>
+        </select><span class="help-inline muted">Majority gender of players</span>
+        <br><br>
+        <select data-placeholder="Select a status..." name="status">
+       	  <option value="">None</option>
+          <option value="Initial Discussion">Initial Discussion</option>
+          <option value="Delayed Integration">Delayed Integration</option>
+          <option value="Integrating">Integrating</option>
+          <option value="Testing">Testing</option>
+          <option value="Live">Live</option>
+          <option value="Dormant">Dormant</option>
+        </select><span class="help-inline muted">Status of Game integration</span>
+        <br><br>
+        <button type="submit" class="btn btn-primary">Search the Beagle</button>
+    </form>
+{% if games %}
+<div class="row">
+  <div class="games span12">
+    <div class="page-header">
+    <h1>Games</h1>
+    </div>
+<table id="games" class="tablesorter table table-striped table-bordered table-condensed">
+  <thead>
+        <tr>
+          <th class="blue">Game</th>
+          <th class="blue">DAU</th>
+          <th class="blue">Age</th>
+          <th class="blue">Gender</th>
+          <th class="blue">Status</th>
+          <th class="blue">Lead</th>
+        </tr>
+  </thead>
+  <tbody>
+  {% for game in games %}
+          <tr>
+            <td><a href="/lead/{{ game.lead_id }}">{{ game.name }}</a></td>
+            <td>{{ game.dau }}</td>
+            <td>{{ game.age }}</td>
+            <td>{{ game.gender }}</td>
+            <td><span class="label label-info">{{ game.status }}</span></td>
+            <td><a href"/lead/{{ game.lead_id }}">{{ game.lead.developer }}</a></td>
+          </tr>
+  {% endfor %}
+  </tbody>
+  </table>
+  </div>
+</div>
+{% endif %}
 {% endblock %}

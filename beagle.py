@@ -44,9 +44,9 @@ class Lead(db.Model):
     modified = db.Column(db.DateTime, default=datetime.datetime.utcnow(), onupdate=datetime.datetime.utcnow(), index=True)
     created = db.Column(db.DateTime, default=datetime.datetime.utcnow(), index=True)
     user_id = db.Column(db.String(36), db.ForeignKey('user.id'))
-    
+
     user = db.relationship(User, backref='leads', lazy='joined')
-    
+
     def __init__(self, developer=developer, name=name, email=email, user_id=user_id, id=None):
         self.developer = developer
         self.name = name
@@ -68,7 +68,7 @@ class Game(db.Model):
     created = db.Column(db.DateTime, default=datetime.datetime.utcnow(), index=True)
 
     lead = db.relationship(Lead, backref='games', lazy='joined')
-    
+
     def __init__(self, name=name, lead_id=lead_id, status=status, ratings=ratings, age=age, gender=gender, dau=None, id=None):
         self.name = name
         self.lead_id = lead_id
@@ -80,7 +80,7 @@ class Game(db.Model):
             self.dau = float(self.ratings) * float(settings.RATINGS_MULTIPLIER)
         if id is None:
             self.id = str(uuid.uuid4()).replace('-', '')
-            
+
 # oauth settings (this can be pretty easily swapped out for twitter/github/etc.)
 
 facebook = oauth.remote_app('facebook',
@@ -106,7 +106,7 @@ def auth_required(role):
                 return f(*a, **kw)
         return inner
     return decorator
-    
+
 @facebook.tokengetter
 def get_facebook_oauth_token():
     return session.get('oauth_token')
@@ -115,25 +115,20 @@ def get_facebook_oauth_token():
 
 @app.route("/")
 def index():
-    lead_query = Lead.query.order_by(Lead.created)
-    leads = lead_query.limit(10).all()
-    game_query = Game.query.order_by(Game.created)
-    games = game_query.limit(10).all()
-    users = User.query.all()
     if not session.get('user'):
         return render_template('login.html')
+    lead_query = Lead.query.order_by(Lead.created).options(joinedload('user'))
+    leads = lead_query.limit(10).all()
+    game_query = Game.query.order_by(Game.created).options(joinedload('lead.user'))
+    games = game_query.limit(10).all()
+    users = User.query.all()
     return render_template('index.html', leads=leads, games=games, users=users)
-
-@app.route("/browse")
-@auth_required('user')
-def browse():
-    return render_template('browse.html')
 
 @app.route("/search")
 @auth_required('user')
 def search():
     query = str(request.args['query'])
-    lead_query = Lead.query.order_by(Lead.created)
+    lead_query = Lead.query.order_by(Lead.created).options(joinedload('user'))
     leads = lead_query.limit(10).all()
     leads = Lead.query.filter(Lead.developer.like("%" + query + "%")).all()
     leads += Lead.query.filter(Lead.email.like("%" + query + "%")).all()
@@ -142,6 +137,18 @@ def search():
     leads = unq_leads.values()
     games = Game.query.filter(Game.name.like("%" + query + "%")).all()
     return render_template('search.html', leads=leads, games=games)
+
+@app.route("/browse")
+@auth_required('user')
+def browse():
+    if request.args:
+        gender = request.args.get('gender')
+        age = request.args.get('age')
+        status = request.args.get('status')
+        games = Game.query.filter_by(age=age, gender=gender, status=status)
+    else:
+        games = []
+    return render_template('browse.html', games=games)
 
 @app.route("/add/lead", methods=['POST'])
 @auth_required('user')
@@ -155,9 +162,9 @@ def add_lead():
         try:
             db.session.add(lead)
             db.session.commit()
-            flash(u'Your lead was succesfully saved as <strong><a href=\"/lead/%s\">%s</a></strong>. It\'s automatically been assigned to you. Add a game below.' % (lead.id, lead.developer), 'alert-success')            
+            flash(u'Your lead was succesfully saved as <strong><a href=\"/lead/%s\">%s</a></strong>. It\'s automatically been assigned to you. Add a game below.' % (lead.id, lead.developer), 'alert-success')
         except IntegrityError:
-            flash('Looks like <strong>%s</strong> was a duplicate. Search results are below!' % email, 'alert-warning')            
+            flash('Looks like <strong>%s</strong> was a duplicate. Search results are below!' % email, 'alert-warning')
             return redirect('%s?query=%s' % (url_for('search'), email))
         return redirect('/new/game/%s' % lead.id)
 
@@ -177,9 +184,9 @@ def update_lead():
         lead.user_id = user_id
         try:
             db.session.commit()
-            flash(u'Your lead was succesfully updated as <strong><a href=\"/lead/%s\">%s</a></strong>.' % (lead.id, lead.developer), 'alert-success')            
+            flash(u'Your lead was succesfully updated as <strong><a href=\"/lead/%s\">%s</a></strong>.' % (lead.id, lead.developer), 'alert-success')
         except IntegrityError:
-            flash('Looks like <strong>%s</strong> was a duplicate. Search results are below!' % email, 'alert-warning')            
+            flash('Looks like <strong>%s</strong> was a duplicate. Search results are below!' % email, 'alert-warning')
             return redirect('%s?query=%s' % (url_for('search'), email))
         return redirect('/lead/%s' % lead.id)
 
@@ -192,12 +199,12 @@ def add_game():
         status = request.form['status']
         ratings = request.form['ratings']
         age = request.form['age']
-        gender = request.form['gender'] 
+        gender = request.form['gender']
         game = Game(name=name, lead_id=lead_id, status=status, ratings=ratings, age=age, gender=gender)
         try:
             db.session.add(game)
             db.session.commit()
-            flash(u'Your game was succesfully saved as <strong><a href=\"/lead/%s\">%s</a></strong>.' % (lead_id, game.name), 'alert-success')            
+            flash(u'Your game was succesfully saved as <strong><a href=\"/lead/%s\">%s</a></strong>.' % (lead_id, game.name), 'alert-success')
         except IntegrityError:
             flash('Something went wrong! We couldn\'t add your game!', 'alert-danger')
         return redirect(url_for('lead', id=lead_id))
@@ -221,7 +228,7 @@ def update_game():
         game.gender = gender
         try:
             db.session.commit()
-            flash(u'Your game was succesfully updated as <strong><a href=\"/lead/%s\">%s</a></strong>.' % (lead_id, game.name), 'alert-success')            
+            flash(u'Your game was succesfully updated as <strong><a href=\"/lead/%s\">%s</a></strong>.' % (lead_id, game.name), 'alert-success')
         except IntegrityError:
             flash('Something went wrong! We couldn\'t add your game!', 'alert-danger')
         return redirect(url_for('lead', id=lead_id))
@@ -234,7 +241,7 @@ def delete_game(id):
         db.delete(game)
         db.session.commit()
         db.session.flush()
-        flash(u'The game %s was succesfully deleted' % (game.name), 'alert-danger')            
+        flash(u'The game %s was succesfully deleted' % (game.name), 'alert-danger')
     except:
         flash('Something went wrong! We couldn\'t delete your game!', 'alert-danger')
     return redirect(url_for('index'))
@@ -268,10 +275,11 @@ def lead(id):
 @app.route("/user/<id>")
 @auth_required('user')
 def user(id):
+    games = Game.query.order_by(Game.dau).options(joinedload('lead.user'))
     user = User.query.get_or_404(id)
-    return render_template('results.html', user=user)
+    return render_template('user.html', user=user, games=games)
 
-    
+
 @app.route('/login/authorized')
 @facebook.authorized_handler
 def facebook_authorized(resp):
@@ -301,7 +309,7 @@ def facebook_authorized(resp):
     # if their fb_id exists in the safe users list.
     except:
         user = User(fb_id=me.data['id'], name=me.data['name'], email=me.data['email'])
-        try: 
+        try:
             db.session.add(user)
             db.session.commit()
             session['user'] = user.id
@@ -310,7 +318,7 @@ def facebook_authorized(resp):
             flash(u'Error: We were unable to create your account.', 'alert-error')
             return redirect(url_for('index'))
     return redirect(url_for('index'))
-    
+
 @app.route('/login')
 def login():
     return facebook.authorize(callback=settings.FACEBOOK_CALLBACK + url_for('facebook_authorized',
@@ -336,6 +344,6 @@ def configure_raven(app):
             traceback.print_exc()
 
 sentry = configure_raven(app)
-    
+
 if __name__ == "__main__":
     app.run(debug=settings.DEBUG, port=settings.PORT, host='0.0.0.0')
