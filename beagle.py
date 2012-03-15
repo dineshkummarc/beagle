@@ -238,12 +238,28 @@ def update_game():
 def delete_game(id):
     game = Game.query.get(id)
     try:
-        db.delete(game)
+        db.session.delete(game)
         db.session.commit()
         db.session.flush()
         flash(u'The game %s was succesfully deleted' % (game.name), 'alert-danger')
     except:
         flash('Something went wrong! We couldn\'t delete your game!', 'alert-danger')
+    return redirect('lead/%s' % game.lead_id)
+
+@app.route("/delete/lead/<id>")
+@auth_required('user')
+def delete_lead(id):
+    lead = Lead.query.get(id)
+    for game in lead.games:
+        game = Game.query.get(game.id)
+        db.session.delete(game)
+    try:
+        db.session.delete(lead)
+        db.session.commit()
+        db.session.flush()
+        flash(u'The lead %s was succesfully deleted' % (lead.developer), 'alert-danger')
+    except:
+        flash('Something went wrong! We couldn\'t delete your lead!', 'alert-danger')
     return redirect(url_for('index'))
 
 @app.route("/new/game/<id>")

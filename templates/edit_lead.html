@@ -4,6 +4,7 @@
 <div class="row">
   <div class="leads span12">
       <form class="well form-vertical" autocomplete="off" action="{{ url_for('update_lead') }}" method=POST>
+      <a href="/delete/lead/{{ lead.id }}" id='lead-delete' class="btn btn-danger pull-right">Delete Lead</a>
       <label><h4>Edit Lead</h4></label>
         <input type="hidden" name="lead_id" class="span3" value="{{ lead.id }}">
         <input type="text" name="developer" class="span3" value="{{ lead.developer }}"><span class="help-inline muted">Developer</span>
@@ -31,7 +32,7 @@
     {% for game in lead.games %}
     <div id="{{ game.id }}">
       <form class="well form-vertical" autocomplete="off" action="{{ url_for('update_game') }}" method=POST>
-      <a href="/delete/game/{{ game.id }}" class="btn btn-danger pull-right">Delete Game</a>
+      <a href="/delete/game/{{ game.id }}" id='game-delete' class="btn btn-danger pull-right">Delete Game</a>
       <label><h4>Edit Game</h4></label>
         <input type="hidden" name="lead_id" class="span3" value="{{ lead.id }}">
         <input type="hidden" name="game_id" class="span3" value="{{ game.id }}">

@@ -17,6 +17,8 @@
     $(document).ready(function()
         {
             $("table").tablesorter({textExtraction: 'complex'});
+            $("#lead-delete").click(function(event){alert("Are you sure you want to delete this Lead? It will also delete all games!");});
+            $("#game-delete").click(function(event){alert("Are you sure you want to delete this Game?");});
         }
     );
     </script>
