@@ -72,7 +72,7 @@
         {% endif %}
         </select><span class="help-inline muted">Status</span>
         <br>
-        <input type="text" name="ratings" class="span3" value="{{ (game.dau / 1.8) }}"><span class="help-inline muted">Ratings</span>
+        <input type="text" name="ratings" class="span3" value="{{ game.ratings }}"><span class="help-inline muted">Ratings</span>
         <br>
         <select name="age" value={{ game.age }}>
         {% if game.age == '13-17' %}

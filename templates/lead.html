@@ -8,7 +8,9 @@
     <h6>Email: <strong><a href="mailto:{{ lead.email }}">{{ lead.email }}</a></strong></h6>
   </div>
   <div class="quickstats span4 pull-right">
+    {% if lead in user.leads %}
     <a class="btn pull-right" href="/lead/{{ lead.id }}/edit">Edit</a>
+    {% endif %}
     <h4>Owned by <a href="/user/{{ user.id }}">{{ user.name }}</a></h4>
     <h6>Created on {{ lead.created }}</h6>
     <h6>Last Modified {{ lead.modified }}</h6>

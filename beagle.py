@@ -10,6 +10,8 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy import desc
 from sqlalchemy.orm import joinedload
 from functools import wraps
+from wtforms import Form, BooleanField, TextField, PasswordField, validators, IntegerField
+
 
 # initialize the things
 
@@ -77,9 +79,27 @@ class Game(db.Model):
         self.gender = gender
         self.age = age
         if dau is None:
-            self.dau = float(self.ratings) * float(settings.RATINGS_MULTIPLIER)
+            self.dau = int(self.ratings * settings.RATINGS_MULTIPLIER)
         if id is None:
             self.id = str(uuid.uuid4()).replace('-', '')
+
+# Forms
+
+class LeadForm(Form):
+    lead_id = TextField('lead_id')
+    developer = TextField('developer')
+    email = TextField('email')
+    name = TextField('name')
+    user_id = TextField('user_id')
+
+class GameForm(Form):
+    lead_id = TextField('lead_id')
+    game_id = TextField('game_id')
+    name = TextField('name')
+    status = TextField('status')
+    ratings = IntegerField('ratings')
+    age = TextField('age')
+    gender = TextField('gender')
 
 # oauth settings (this can be pretty easily swapped out for twitter/github/etc.)
 
@@ -153,85 +173,69 @@ def browse():
 @app.route("/add/lead", methods=['POST'])
 @auth_required('user')
 def add_lead():
-    if request.method == 'POST':
-        developer = request.form['developer']
-        email = request.form['email']
-        name = request.form['name']
-        user_id = session['user']
-        lead = Lead(developer=developer, name=name, email=email, user_id=user_id)
+    form = LeadForm(request.form)
+    if request.method == 'POST' and form.validate():
+        lead = Lead(form.developer.data, form.name.data, form.email.data, session['user'])
         try:
             db.session.add(lead)
             db.session.commit()
             flash(u'Your lead was succesfully saved as <strong><a href=\"/lead/%s\">%s</a></strong>. It\'s automatically been assigned to you. Add a game below.' % (lead.id, lead.developer), 'alert-success')
-        except IntegrityError:
-            flash('Looks like <strong>%s</strong> was a duplicate. Search results are below!' % email, 'alert-warning')
-            return redirect('%s?query=%s' % (url_for('search'), email))
-        return redirect('/new/game/%s' % lead.id)
+        except:
+            flash('Looks like <strong>%s</strong> was a duplicate. Search results are below!' % form.email.data, 'alert-warning')
+            return redirect('%s?query=%s' % (url_for('search'), form.email.data))
+    return redirect('/new/game/%s' % lead.id)
 
 @app.route("/update/lead", methods=['POST'])
 @auth_required('user')
 def update_lead():
-    if request.method == 'POST':
-        lead_id = request.form['lead_id']
-        developer = request.form['developer']
-        email = request.form['email']
-        name = request.form['name']
-        user_id = session['user']
-        lead = Lead.query.get(lead_id)
-        lead.developer = developer
-        lead.email = email
-        lead.name = name
-        lead.user_id = user_id
+    form = LeadForm(request.form)
+    if request.method == 'POST' and form.validate():
+        lead = Lead.query.get(form.lead_id.data)
+        lead.developer = form.developer.data
+        lead.email = form.email.data
+        lead.name = form.name.data
+        lead.user_id = form.user_id.data
         try:
             db.session.commit()
             flash(u'Your lead was succesfully updated as <strong><a href=\"/lead/%s\">%s</a></strong>.' % (lead.id, lead.developer), 'alert-success')
         except IntegrityError:
-            flash('Looks like <strong>%s</strong> was a duplicate. Search results are below!' % email, 'alert-warning')
-            return redirect('%s?query=%s' % (url_for('search'), email))
-        return redirect('/lead/%s' % lead.id)
-
-@app.route("/add/game", methods=['POST'])
-@auth_required('user')
-def add_game():
-    if request.method == 'POST':
-        lead_id = request.form['lead_id']
-        name = request.form['name']
-        status = request.form['status']
-        ratings = request.form['ratings']
-        age = request.form['age']
-        gender = request.form['gender']
-        game = Game(name=name, lead_id=lead_id, status=status, ratings=ratings, age=age, gender=gender)
-        try:
-            db.session.add(game)
-            db.session.commit()
-            flash(u'Your game was succesfully saved as <strong><a href=\"/lead/%s\">%s</a></strong>.' % (lead_id, game.name), 'alert-success')
-        except IntegrityError:
-            flash('Something went wrong! We couldn\'t add your game!', 'alert-danger')
-        return redirect(url_for('lead', id=lead_id))
+            flash('Looks like <strong>%s</strong> was a duplicate. Search results are below!' % form.email.data, 'alert-warning')
+            return redirect('%s?query=%s' % (url_for('search'), form.email.data))
+    return redirect('/lead/%s' % lead.id)
 
 @app.route("/update/game", methods=['POST'])
 @auth_required('user')
 def update_game():
-    if request.method == 'POST':
-        lead_id = request.form['lead_id']
-        game_id = request.form['game_id']
-        name = request.form['name']
-        status = request.form['status']
-        ratings = request.form['ratings']
-        age = request.form['age']
-        gender = request.form['gender']
-        game = Game.query.get(game_id)
-        game.name = name
-        game.status = status
-        game.ratings = ratings
-        game.age = age
-        game.gender = gender
+    form = GameForm(request.form)
+    if request.method == 'POST' and form.validate():
+        game = Game.query.get(form.game_id.data)
+        game.name = form.name.data
+        game.status = form.status.data
+        game.ratings = form.ratings.data
+        game.age = form.age.data
+        game.gender = form.gender.data
+        game.lead_id = form.lead_id.data
         try:
             db.session.commit()
-            flash(u'Your game was succesfully updated as <strong><a href=\"/lead/%s\">%s</a></strong>.' % (lead_id, game.name), 'alert-success')
+            flash(u'Your game was succesfully updated as <strong><a href=\"/lead/%s\">%s</a></strong>.' % (form.lead_id.data, game.name), 'alert-success')
         except IntegrityError:
             flash('Something went wrong! We couldn\'t add your game!', 'alert-danger')
-        return redirect(url_for('lead', id=lead_id))
+            return redirect('/lead/%s' % form.lead_id.data)
+    return redirect('/lead/%s' % form.lead_id.data)
+
+@app.route("/add/game", methods=['POST'])
+@auth_required('user')
+def add_game():
+    form = GameForm(request.form)
+    if request.method == 'POST' and form.validate():
+        game = Game(form.name.data, form.lead_id.data, form.status.data, form.ratings.data, form.age.data, form.gender.data)
+        try:
+            db.session.add(game)
+            db.session.commit()
+            flash(u'Your game was succesfully saved as <strong><a href=\"/lead/%s\">%s</a></strong>.' % (game.lead_id, game.name), 'alert-success')
+        except IntegrityError:
+            flash('Something went wrong! We couldn\'t add your game!', 'alert-danger')
+        return redirect(url_for('lead', id=form.lead_id.data))
 
 @app.route("/delete/game/<id>")
 @auth_required('user')

@@ -6,3 +6,4 @@ SQLAlchemy==0.7.5
 psycopg2==2.4.4
 raven==1.4.3
 blinker==1.2
+WTForms==1.0.1
