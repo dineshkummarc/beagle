@@ -41,45 +41,68 @@ class User(db.Model):
 class Lead(db.Model):
     id = db.Column(db.String(36), primary_key=True)
     developer = db.Column(db.String(80), index=True)
-    name = db.Column(db.String(80), index=True)
-    email = db.Column(db.String(80), unique=True, index=True)
     modified = db.Column(db.DateTime, default=datetime.datetime.utcnow(), onupdate=datetime.datetime.utcnow(), index=True)
     created = db.Column(db.DateTime, default=datetime.datetime.utcnow(), index=True)
+    website = db.Column(db.String(200), index=True)
+    note = db.Column(db.LargeBinary)
     user_id = db.Column(db.String(36), db.ForeignKey('user.id'))
 
     user = db.relationship(User, backref='leads', lazy='joined')
 
-    def __init__(self, developer=developer, name=name, email=email, user_id=user_id, id=None):
+    def __init__(self, developer=developer, website=website, user_id=user_id, note=None, id=None):
         self.developer = developer
-        self.name = name
-        self.email = email
+        self.website = website
+        self.note = note
         self.user_id = user_id
         if id is None:
             self.id = str(uuid.uuid4()).replace('-', '')
 
-class Game(db.Model):
-    id = db.Column(db.String(80), primary_key=True)
+class Contact(db.Model):
+    id = db.Column(db.String(36), primary_key=True)
     name = db.Column(db.String(80), index=True)
+    email = db.Column(db.String(80), unique=True, index=True)
+    phone = db.Column(db.String(80), index=True)
+    title = db.Column(db.String(120), index=True)
+    modified = db.Column(db.DateTime, default=datetime.datetime.utcnow(), onupdate=datetime.datetime.utcnow(), index=True)
+    created = db.Column(db.DateTime, default=datetime.datetime.utcnow(), index=True)
     lead_id = db.Column(db.String(36), db.ForeignKey('lead.id'))
+
+    lead = db.relationship(Lead, backref='contacts', lazy='joined')
+
+    def __init__(self, lead_id=lead_id, name=name, email=email, phone=phone, title=title, id=None):
+        self.lead_id = lead_id
+        self.name = name
+        self.email = email
+        self.title = title
+        self.phone = phone
+        if id is None:
+            self.id = str(uuid.uuid4()).replace('-', '')
+
+class Game(db.Model):
+    id = db.Column(db.String(36), primary_key=True)
+    name = db.Column(db.String(80), index=True)
     status = db.Column(db.String(80), index=True)
     ratings = db.Column(db.Integer)
     dau = db.Column(db.Integer)
     age = db.Column(db.String(80))
     gender = db.Column(db.String(80))
+    platform = db.Column(db.String(80))
     modified = db.Column(db.DateTime, default=datetime.datetime.utcnow(), onupdate=datetime.datetime.utcnow(), index=True)
     created = db.Column(db.DateTime, default=datetime.datetime.utcnow(), index=True)
+    lead_id = db.Column(db.String(36), db.ForeignKey('lead.id'))
 
     lead = db.relationship(Lead, backref='games', lazy='joined')
 
-    def __init__(self, name=name, lead_id=lead_id, status=status, ratings=ratings, age=age, gender=gender, dau=None, id=None):
+    def __init__(self, name=name, lead_id=lead_id, status=status, ratings=ratings, age=age, gender=gender, platform=platform, dau=None, id=None):
         self.name = name
         self.lead_id = lead_id
         self.status = status
         self.ratings = ratings
         self.gender = gender
         self.age = age
+        self.platform = platform
         if dau is None:
-            self.dau = int(self.ratings * settings.RATINGS_MULTIPLIER)
+            self.dau = int(self.ratings * float(settings.RATINGS_MULTIPLIER))
         if id is None:
             self.id = str(uuid.uuid4()).replace('-', '')
 
@@ -88,8 +111,8 @@ class Game(db.Model):
 class LeadForm(Form):
     lead_id = TextField('lead_id')
     developer = TextField('developer')
-    email = TextField('email')
-    name = TextField('name')
+    website = TextField('website')
+    note = TextField('note')
     user_id = TextField('user_id')
 
 class GameForm(Form):
@@ -100,6 +123,14 @@ class GameForm(Form):
     ratings = IntegerField('ratings')
     age = TextField('age')
     gender = TextField('gender')
+    platform = TextField('platform')
+
+class ContactForm(Form):
+    lead_id = TextField('lead_id')
+    name = TextField('name')
+    email = TextField('email')
+    phone = TextField('phone')
+    title = TextField('title')
 
 # oauth settings (this can be pretty easily swapped out for twitter/github/etc.)
 
@@ -131,8 +162,10 @@ def auth_required(role):
 def get_facebook_oauth_token():
     return session.get('oauth_token')
 
+def strip_http(url):
+    clean_url = str(url).replace('http://', '').replace('https://', '')
+    return clean_url
 # views
-
 @app.route("/")
 def index():
     if not session.get('user'):
@@ -149,14 +182,19 @@ def index():
 def search():
     query = str(request.args['query'])
     lead_query = Lead.query.order_by(Lead.created).options(joinedload('user'))
-    leads = lead_query.limit(10).all()
-    leads = Lead.query.filter(Lead.developer.like("%" + query + "%")).all()
-    leads += Lead.query.filter(Lead.email.like("%" + query + "%")).all()
-    leads += Lead.query.filter(Lead.name.like("%" + query + "%")).all()
+    leads = lead_query.filter(Lead.developer.ilike("%" + query + "%")).all()
+    leads += lead_query.filter(Lead.website.ilike("%" + query + "%")).all()
     unq_leads = dict([(l.id, l) for l in leads])
     leads = unq_leads.values()
+    contact_query = Contact.query.order_by(Contact.created).options(joinedload('lead'))
+    contacts = contact_query.filter(Contact.email.ilike("%" + query + "%")).all()
+    contacts += contact_query.filter(Contact.name.ilike("%" + query + "%")).all()
+    contacts += contact_query.filter(Contact.phone.ilike("%" + query + "%")).all()
+    contacts += contact_query.filter(Contact.title.ilike("%" + query + "%")).all()
+    unq_contacts = dict([(c.id, c) for c in contacts])
+    contacts = unq_contacts.values()
     games = Game.query.filter(Game.name.like("%" + query + "%")).all()
-    return render_template('search.html', leads=leads, games=games)
+    return render_template('search.html', leads=leads, games=games, contacts=contacts)
 
 @app.route("/browse")
 @auth_required('user')
@@ -165,25 +203,58 @@ def browse():
         gender = request.args.get('gender')
         age = request.args.get('age')
         status = request.args.get('status')
-        games = Game.query.filter_by(age=age, gender=gender, status=status)
-    else:
-        games = []
-    return render_template('browse.html', games=games)
+        games = Game.query.filter_by()
+        if gender: games = games.filter_by(gender=gender)
+        if age: games = games.filter_by(age=age)
+        if status: games = games.filter_by(status=status)
+        return render_template('browse.html', games=games)
+    return render_template('browse.html', request.args)
 
 @app.route("/add/lead", methods=['POST'])
 @auth_required('user')
 def add_lead():
     form = LeadForm(request.form)
     if request.method == 'POST' and form.validate():
-        lead = Lead(form.developer.data, form.name.data, form.email.data, session['user'])
+        lead = Lead(form.developer.data, strip_http(form.website.data), session['user'])
         try:
             db.session.add(lead)
             db.session.commit()
+            app.logger.info("The lead %s was added." % lead.developer)
             flash(u'Your lead was succesfully saved as <strong><a href=\"/lead/%s\">%s</a></strong>. It\'s automatically been assigned to you. Add a game below.' % (lead.id, lead.developer), 'alert-success')
-        except:
+        except IntegrityError:
             flash('Looks like <strong>%s</strong> was a duplicate. Search results are below!' % form.email.data, 'alert-warning')
             return redirect('%s?query=%s' % (url_for('search'), form.email.data))
-    return redirect('/new/game/%s' % lead.id)
+    return redirect('/new/contact/%s' % lead.id)
+
+@app.route("/add/game", methods=['POST'])
+@auth_required('user')
+def add_game():
+    form = GameForm(request.form)
+    if request.method == 'POST' and form.validate():
+        game = Game(form.name.data, form.lead_id.data, form.status.data, form.ratings.data, form.age.data, form.gender.data, form.platform.data)
+        try:
+            db.session.add(game)
+            db.session.commit()
+            app.logger.info("The game %s was added." % game.name)
+            flash(u'Your game was succesfully saved as <strong><a href=\"/lead/%s\">%s</a></strong>.' % (game.lead_id, game.name), 'alert-success')
+        except IntegrityError:
+            flash('Something went wrong! We couldn\'t add your game!', 'alert-danger')
+        return redirect('/lead/%s' % game.lead_id)
+
+@app.route("/add/contact", methods=['POST'])
+@auth_required('user')
+def add_contact():
+    form = ContactForm(request.form)
+    if request.method == 'POST' and form.validate():
+        contact = Contact(form.lead_id.data, form.name.data, form.email.data, form.phone.data, form.title.data)
+        try:
+            db.session.add(contact)
+            db.session.commit()
+            app.logger.info("%s was added to the lead %s" % (contact.name, contact.lead.developer))
+            flash(u'Your contact was succesfully added as <strong><a href=\"/lead/%s\">%s</a></strong>.' % (contact.lead_id, contact.name), 'alert-success')
+        except IntegrityError:
+            flash('Something went wrong! We couldn\'t add your contact!', 'alert-danger')
+        return redirect('/new/game/%s' % contact.lead_id)
 
 @app.route("/update/lead", methods=['POST'])
 @auth_required('user')
@@ -192,11 +263,12 @@ def update_lead():
     if request.method == 'POST' and form.validate():
         lead = Lead.query.get(form.lead_id.data)
         lead.developer = form.developer.data
-        lead.email = form.email.data
-        lead.name = form.name.data
+        lead.website = strip_http(form.website.data)
         lead.user_id = form.user_id.data
+        lead.note = form.note.data
         try:
             db.session.commit()
+            app.logger.info("The lead %s was updated." % lead.developer)
             flash(u'Your lead was succesfully updated as <strong><a href=\"/lead/%s\">%s</a></strong>.' % (lead.id, lead.developer), 'alert-success')
         except IntegrityError:
             flash('Looks like <strong>%s</strong> was a duplicate. Search results are below!' % form.email.data, 'alert-warning')
@@ -214,28 +286,36 @@ def update_game():
         game.ratings = form.ratings.data
         game.age = form.age.data
         game.gender = form.gender.data
+        game.platform = form.platform.data
         game.lead_id = form.lead_id.data
         try:
             db.session.commit()
+            app.logger.info("The game %s was updated." % game.name)
             flash(u'Your game was succesfully updated as <strong><a href=\"/lead/%s\">%s</a></strong>.' % (form.lead_id.data, game.name), 'alert-success')
         except IntegrityError:
             flash('Something went wrong! We couldn\'t add your game!', 'alert-danger')
             return redirect('/lead/%s' % form.lead_id.data)
     return redirect('/lead/%s' % form.lead_id.data)
 
-@app.route("/add/game", methods=['POST'])
+@app.route("/update/contact", methods=['POST'])
 @auth_required('user')
-def add_game():
+def update_contact():
     form = GameForm(request.form)
     if request.method == 'POST' and form.validate():
-        game = Game(form.name.data, form.lead_id.data, form.status.data, form.ratings.data, form.age.data, form.gender.data)
+        contact = Contact.query.get(form.contact_id.data)
+        contact.name = form.name.data
+        contact.email = form.email.data
+        contact.phone = form.phone.data
+        contact.title = form.title.data
         try:
-            db.session.add(game)
             db.session.commit()
-            flash(u'Your game was succesfully saved as <strong><a href=\"/lead/%s\">%s</a></strong>.' % (game.lead_id, game.name), 'alert-success')
+            app.logger.info("The contact %s was updated." % contact.name)
+            flash(u'Your contact was succesfully updated as <strong><a href=\"/lead/%s\">%s</a></strong>.' % (form.lead_id.data, contact.name), 'alert-success')
         except IntegrityError:
-            flash('Something went wrong! We couldn\'t add your game!', 'alert-danger')
-        return redirect(url_for('lead', id=form.lead_id.data))
+            flash('Something went wrong! We couldn\'t add your contact!', 'alert-danger')
+            return redirect('/lead/%s' % form.lead_id.data)
+    return redirect('/lead/%s' % form.lead_id.data)
+
 
 @app.route("/delete/game/<id>")
 @auth_required('user')
@@ -244,11 +324,26 @@ def delete_game(id):
     try:
         db.session.delete(game)
         db.session.commit()
+        app.logger.info("The game %s was deleted." % game.name)
         db.session.flush()
         flash(u'The game %s was succesfully deleted' % (game.name), 'alert-danger')
     except:
         flash('Something went wrong! We couldn\'t delete your game!', 'alert-danger')
     return redirect('lead/%s' % game.lead_id)
+
+@app.route("/delete/contact/<id>")
+@auth_required('user')
+def delete_contact(id):
+    contact = Contact.query.get(id)
+    try:
+        db.session.delete(contact)
+        db.session.commit()
+        app.logger.info("The contact %s was deleted." % contact.name)
+        db.session.flush()
+        flash(u'The contact %s was succesfully deleted' % (contact.name), 'alert-danger')
+    except:
+        flash('Something went wrong! We couldn\'t delete your contact!', 'alert-danger')
+    return redirect('lead/%s' % contact.lead_id)
 
 @app.route("/delete/lead/<id>")
 @auth_required('user')
@@ -260,6 +355,7 @@ def delete_lead(id):
     try:
         db.session.delete(lead)
         db.session.commit()
+        app.logger.info("The lead %s was deleted." % lead.developer)
         db.session.flush()
         flash(u'The lead %s was succesfully deleted' % (lead.developer), 'alert-danger')
     except:
@@ -272,6 +368,12 @@ def new_game(id):
     lead = Lead.query.get_or_404(id)
     return render_template('new_game.html', lead=lead)
 
+@app.route("/new/contact/<id>")
+@auth_required('user')
+def new_contact(id):
+    lead = Lead.query.get_or_404(id)
+    return render_template('new_contact.html', lead=lead)
+
 @app.route("/new/lead")
 @auth_required('user')
 def new_lead():
@@ -283,6 +385,7 @@ def edit_lead(id):
     lead = Lead.query.get_or_404(id)
     user = User.query.get(lead.user_id)
     users = User.query.all()
+    users.remove(user)
     return render_template('edit_lead.html', lead=lead, users=users, user=user)
 
 @app.route("/lead/<id>")
@@ -324,6 +427,7 @@ def facebook_authorized(resp):
         # set a cookie and put the user at the starting page.
         session['user'] = user.id
         flash(u'Welcome %s, you can begin by searching above for duplicate leads.' % me.data['name'], 'alert-success')
+        app.logger.info("%s logged in." % me.data['name'])
         return redirect(url_for('index'))
     # If the user does not already exist, make them. We'll only get here
     # if their fb_id exists in the safe users list.
@@ -334,6 +438,7 @@ def facebook_authorized(resp):
             db.session.commit()
             session['user'] = user.id
             session['name'] = user.name
+            app.logger.info("An account was created for %s." % me.data['name'])
         except:
             flash(u'Error: We were unable to create your account.', 'alert-error')
             return redirect(url_for('index'))

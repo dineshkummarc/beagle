@@ -31,7 +31,7 @@
           <a class="brand" href="/">Beagle</a>
           <ul class="nav">
             <form class="navbar-search pull-left" action="{{ url_for('search') }}" method="get">
-              <input type="text" class="search-query" name="query" placeholder="Game, Developer or Email">
+              <input type="text" class="search-query" name="query" placeholder="Game, Developer or Contact Data">
             </form>
             <li><a href="/new/lead">New Lead</a></li>
             <li><a href="/user/{{ session['user'] }}">My Leads</a></li>

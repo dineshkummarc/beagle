@@ -6,12 +6,13 @@
     <div class="page-header">
     <h1>Leads</h1>
     </div>
-<table id="leads" class="table table-striped table-bordered table-condensed">
+<table id="leads" class="tablesorter table table-striped table-bordered table-condensed">
   <thead>
         <tr>
           <th class="blue">Developer</th>
           <th class="blue">Games</th>
-          <th class="blue">Email</th>
+          <th class="blue">#</th>
+          <th class="blue">Contacts</th>
           <th class="blue">Owner</th>
         </tr>
   </thead>
@@ -20,8 +21,9 @@
           <tr>
             <td><a href="/lead/{{ lead.id }}">{{ lead.developer }}</a></td>
             <td>{% for game in lead.games %}<a href="/lead/{{ lead.id }}#{{ game.id }}">{{ game.name }}</a> {% endfor %}</td>
-            <td><a href="mailto:{{ lead.email }}">{{ lead.email }}</a></td>
-            <td><a href="/user/{{ lead.user_id }}">{{ lead.user.name }}</a></td>
+            <td>{{ lead.games|length }}</td>
+            <td>{% for contact in lead.contacts %}<a href="lead/{{ contact.lead_id }}#{{ contact.id }}">{{ contact.name }}</a> {% endfor %}</td>
+            <td><a href="/user/{{ lead.user.id }}">{{ lead.user.name }}</a></td>
           </tr>
   {% endfor %}
     </tbody>
@@ -33,7 +35,7 @@
     <div class="page-header">
     <h1>Games</h1>
     </div>
-<table id="games" class="table table-striped table-bordered table-condensed">
+<table id="games" class="tablesorter table table-striped table-bordered table-condensed">
   <thead>
         <tr>
           <th class="blue">Game</th>
@@ -53,6 +55,35 @@
             <td>{{ game.age }}</td>
             <td>{{ game.gender }}</td>
             <td><span class="label label-success">{{ game.status }}</span></td>
+          </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</div>
+<div class="row">
+  <div class="contacts span12">
+    <div class="page-header">
+    <h1>Contacts</h1>
+    </div>
+<table id="contacts" class="tablesorter table table-striped table-bordered table-condensed">
+  <thead>
+        <tr>
+          <th class="blue">Name</th>
+          <th class="blue">Lead</th>
+          <th class="blue">Title</th>
+          <th class="blue">Email</th>
+          <th class="blue">Phone</th>
+        </tr>
+  </thead>
+    <tbody>
+    {% for contact in contacts %}
+          <tr>
+            <td>{{ contact.name }}</td>
+            <td><a href="/lead/{{ contact.lead_id }}">{{ contact.lead.developer }}</a></td>
+            <td>{{ contact.title }}</td>
+            <td><a href="{{ contact.email }}">{{ contact.email }}</a></td>
+            <td>{{ contact.phone }}</td>
           </tr>
     {% endfor %}
     </tbody>
