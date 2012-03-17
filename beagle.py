@@ -255,7 +255,10 @@ def add_contact():
             flash(u'Your contact was succesfully added as <strong><a href=\"/lead/%s\">%s</a></strong>.' % (contact.lead_id, contact.name), 'alert-success')
         except IntegrityError:
             flash('Something went wrong! We couldn\'t add your contact!', 'alert-danger')
-        return redirect('/new/game/%s' % contact.lead_id)
+        lead = Lead.query.get(contact.lead_id)
+        if len(lead.contacts) == 1:
+            return redirect('/new/game/%s' % contact.lead_id)
+        return redirect('/lead/%s' % contact.lead_id)
 
 @app.route("/update/lead", methods=['POST'])
 @auth_required('user')
@@ -266,7 +269,7 @@ def update_lead():
         lead.developer = form.developer.data
         lead.website = strip_http(form.website.data)
         lead.user_id = form.user_id.data
-        lead.note = form.note.data
+        lead.note = str(form.note.data)
         try:
             db.session.commit()
             app.logger.info("The lead %s was updated." % lead.developer)
