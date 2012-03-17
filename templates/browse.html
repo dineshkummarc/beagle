@@ -5,19 +5,19 @@
       <label><h4>Sort Games</h4></label>
         <select name="age">
           {% for opt in ["13-20", "22-35", "26-34", "35-55", "55+"] %}
-          <option value="{{ opt }}" {% if request.args.get('age') == opt %}selected='selected'{% endif %}>{{ opt }}</option>
+          <option value="{{ opt }}" {% if args.get('age') == opt %}selected='selected'{% endif %}>{{ opt }}</option>
           {% endfor %}
         </select><span class="help-inline muted">Age</span>
         <br><br>
         <select name="gender">
           {% for opt in ["Male", "Female"] %}
-          <option value="{{ opt }}" {% if request.args.get('gender') == opt %}selected='selected'{% endif %}>{{ opt }}</option>
+          <option value="{{ opt }}" {% if args.get('gender') == opt %}selected='selected'{% endif %}>{{ opt }}</option>
           {% endfor %}
         </select><span class="help-inline muted">Gender</span>
         <br><br>
         <select name="status">
           {% for opt in ["Initial Discussion", "Delayed Integration", "Integrating", "Testing", "Live", "Dormant"] %}
-          <option value="{{ opt }}" {% if request.args.get('status') == opt %}selected='selected'{% endif %}>{{ opt }}</option>
+          <option value="{{ opt }}" {% if args.get('status') == opt %}selected='selected'{% endif %}>{{ opt }}</option>
           {% endfor %}
         </select><span class="help-inline muted">Status</span>
         <br><br>

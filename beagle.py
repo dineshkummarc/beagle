@@ -199,7 +199,8 @@ def search():
 @app.route("/browse")
 @auth_required('user')
 def browse():
-    if request.args:
+    args = request.args
+    if args:
         gender = request.args.get('gender')
         age = request.args.get('age')
         status = request.args.get('status')
@@ -208,7 +209,7 @@ def browse():
         if age: games = games.filter_by(age=age)
         if status: games = games.filter_by(status=status)
         return render_template('browse.html', games=games)
-    return render_template('browse.html', request.args=request.args)
+    return render_template('browse.html', args=args)
 
 @app.route("/add/lead", methods=['POST'])
 @auth_required('user')
