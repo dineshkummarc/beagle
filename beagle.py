@@ -208,7 +208,7 @@ def browse():
         if age: games = games.filter_by(age=age)
         if status: games = games.filter_by(status=status)
         return render_template('browse.html', games=games)
-    return render_template('browse.html', request.args)
+    return render_template('browse.html', request.args=request.args)
 
 @app.route("/add/lead", methods=['POST'])
 @auth_required('user')
