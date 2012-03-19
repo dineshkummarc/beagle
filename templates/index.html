@@ -10,6 +10,7 @@
               <thead>
                     <tr>
                       <th class="blue">Developer</th>
+                      <th class="blue"># Of Games</th>
                       <th class="blue">Owner</th>
                     </tr>
               </thead>
@@ -17,6 +18,7 @@
               {% for lead in leads %}
                     <tr>
                       <td><a href="/lead/{{ lead.id }}">{{ lead.developer }}</a></td>
+                      <td>{{ lead.games|length }}</td>
                       <td><a href="/user/{{ lead.user_id }}">{{ lead.user.name }}</a></td>
                     </tr>
               {% endfor %}
