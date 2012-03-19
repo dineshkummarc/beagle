@@ -53,6 +53,7 @@
                    <tr>
                      <th class="blue">Name</th>
                      <th class="blue">Email</th>
+                     <th class="blue"># Leads</th>
                    </tr>
              </thead>
              <tbody>
@@ -60,6 +61,7 @@
                    <tr>
                      <td><a href="/user/{{ user.id }}">{{ user.name }}</a></td>
                      <td><a href="mailto:{{ user.email }}">{{ user.email }}</a></td>
+                     <td>{{ user.leads|length }}</td>
                    </tr>
              {% endfor %}
              </tbody>

@@ -20,7 +20,7 @@
   {% for lead in leads %}
           <tr>
             <td><a href="/lead/{{ lead.id }}">{{ lead.developer }}</a></td>
-            <td>{% for game in lead.games %}<a href="/lead/{{ lead.id }}#{{ game.id }}">{{ game.name }}</a> {% endfor %}</td>
+            <td>{% for game in lead.games %}<a href="/lead/{{ game.lead_id }}#{{ game.id }}">{{ game.name }}</a> {% endfor %}</td>
             <td>{{ lead.games|length }}</td>
             <td>{% for contact in lead.contacts %}<a href="lead/{{ contact.lead_id }}#{{ contact.id }}">{{ contact.name }}</a> {% endfor %}</td>
             <td><a href="/user/{{ lead.user.id }}">{{ lead.user.name }}</a></td>

@@ -11,18 +11,17 @@
         <tr>
           <th class="blue">Developer</th>
           <th class="blue">Games</th>
-          <th class="blue">#</th>
-          <th class="blue">Email</th>
-          <th class="blue">Owner</th>
+          <th class="blue"># Games</th>
+          <th class="blue">Contacts</th>
         </tr>
   </thead>
   <tbody>
   {% for lead in user.leads %}
           <tr>
             <td><a href="/lead/{{ lead.id }}">{{ lead.developer }}</a></td>
-            <td>{% for game in lead.games %}<a href="/lead/{{ lead.id }}#{{ game.id }}">{{ game.name }}</a> {% endfor %}</td>
-            <td><a href="mailto:{{ lead.email }}">{{ lead.email }}</a></td>
-            <td><a href="/user/{{ lead.user_id }}">{{ lead.user.name }}</a></td>
+            <td>{% for game in lead.games %}<a href="/lead/{{ game.lead_id }}#{{ game.id }}">{{ game.name }}</a> {% endfor %}</td>
+            <td>{{ lead.games|length }}</td>
+            <td>{% for contact in lead.contacts %}<a href="/lead/{{ contact.lead_id }}#{{ contact.id }}">{{ contact.name }}</a> {% endfor %}</td>
           </tr>
   {% endfor %}
   </tbody>
