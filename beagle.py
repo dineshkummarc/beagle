@@ -193,7 +193,7 @@ def search():
     contacts += contact_query.filter(Contact.title.ilike("%" + query + "%")).all()
     unq_contacts = dict([(c.id, c) for c in contacts])
     contacts = unq_contacts.values()
-    games = Game.query.filter(Game.name.like("%" + query + "%")).all()
+    games = Game.query.filter(Game.name.ilike("%" + query + "%")).all()
     return render_template('search.html', leads=leads, games=games, contacts=contacts)
 
 @app.route("/browse")
