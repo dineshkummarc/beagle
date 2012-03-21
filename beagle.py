@@ -3,6 +3,7 @@ import base64
 import uuid
 import datetime
 import settings
+from raven.contrib.flask import Sentry
 from flask import Flask, request, redirect, url_for, session, flash, g, render_template
 from flaskext.oauth import OAuth
 from flaskext.sqlalchemy import SQLAlchemy
@@ -205,9 +206,9 @@ def browse():
         age = request.args.get('age')
         status = request.args.get('status')
         games = Game.query.filter_by()
-        if gender: games = games.filter_by(gender=gender)
-        if age: games = games.filter_by(age=age)
-        if status: games = games.filter_by(status=status)
+        if gender != "N/A": games = games.filter_by(gender=gender)
+        if age != "N/A": games = games.filter_by(age=age)
+        if status != "N/A": games = games.filter_by(status=status)
         return render_template('browse.html', games=games, args=args)
     return render_template('browse.html', args=args)
 
