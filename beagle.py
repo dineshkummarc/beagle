@@ -239,9 +239,13 @@ def add_game():
             db.session.commit()
             app.logger.info("The game %s was added." % game.name)
             flash(u'Your game was succesfully saved as <strong><a href=\"/lead/%s\">%s</a></strong>.' % (game.lead_id, game.name), 'alert-success')
-        except IntegrityError:
+        except:
             flash('Something went wrong! We couldn\'t add your game!', 'alert-danger')
+            return redirect('/lead/%s' % form.lead_id.data)
         return redirect('/lead/%s' % game.lead_id)
+    else:
+        flash('Something went wrong! We couldn\'t add your game!', 'alert-danger')
+        return redirect('/lead/%s' % form.lead_id.data)
 
 @app.route("/add/contact", methods=['POST'])
 @auth_required('user')
