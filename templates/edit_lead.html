@@ -71,6 +71,33 @@
       </form>
     </div>
     {% endfor %}
+</div>
+</div>
+<div class="row">
+  <div class="games span12">
+    <div class="page-header">
+    <h1>Contacts</h1>
+    </div>
+    {% for contact in lead.contacts %}
+    <div id="{{ contact.id }}">
+      <a href="/delete/contact/{{ contact.id }}" id='contact-delete' class="btn btn-danger pull-right">Delete Contact</a>
+      <form class="well form-vertical" autocomplete="off" action="{{ url_for('update_contact') }}" method=POST>
+      <label><h4>Edit Contact</h4></label>
+        <input type="hidden" name="lead_id" class="span3" value="{{ lead.id }}">
+        <br>
+        <input type="text" name="name" class="span3" value="{{ contact.name }}"><span class="help-inline muted">Name of the Contact</span>
+        <br>
+        <input type="text" name="email" class="span3" value="{{ contact.email }}"><span class="help-inline muted">Email</span>
+        <br>
+        <input type="text" name="phone" class="span3" value="{{ contact.phone }}"><span class="help-inline muted">Phone number</span>
+        <br>
+        <input type="text" name="title" class="span3" value="{{ contact.title }}"><span class="help-inline muted">Title</span>
+        <br>
+        <button type="submit" class="btn btn-primary">Submit</button>
+        <a href="/" class="btn">Cancel</a>
+      </form>
+    </div>
+    {% endfor %}
   </div>
 </div>
 {% endblock %}
