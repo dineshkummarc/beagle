@@ -45,7 +45,8 @@
         </tr>
   </thead>
   <tbody>
-  {% for game in games %}
+  {% for lead in user.leads %}
+  {% for game in lead.games %}
           <tr>
             <td><a href="/lead/{{ game.lead_id }}">{{ game.name }}</a></td>
             <td>{{ game.dau }}</td>
@@ -54,6 +55,7 @@
             <td><span class="label label-info">{{ game.status }}</span></td>
             <td><a href="/lead/{{ game.lead_id }}">{{ game.lead.developer }}</a></td>
           </tr>
+  {% endfor %}
   {% endfor %}
   </tbody>
   </table>
