@@ -202,14 +202,30 @@ def search():
 @auth_required('user')
 def browse():
     args = request.args
-    if args:
-        gender = request.args.get('gender')
-        age = request.args.get('age')
-        status = request.args.get('status')
-        games = Game.query.filter_by()
-        if gender != "N/A": games = games.filter_by(gender=gender)
-        if age != "N/A": games = games.filter_by(age=age)
-        if status != "N/A": games = games.filter_by(status=status)
+    if request.method == 'GET':
+        genders = [request.args.get('genders')]
+        ages = [request.args.get('ages')]
+        statuses = [request.args.get('statuses')]
+        gamequery = Game.query.order_by(Game.created)
+        app.logger.info(ages)
+        games = []
+        if "N/A" not in genders:
+            for item in genders:
+                games += gamequery.filter(Game.gender==item).all()
+        if "N/A" in genders:
+            games += gamequery.filter().all()
+        if "N/A" not in ages:
+            for item in ages:
+                games += gamequery.filter(Game.age==item).all()
+        if "N/A" in genders:
+            games += gamequery.filter().all()
+        if "N/A" not in statuses:
+            for item in statuses:
+                games += gamequery.filter(Game.status==item).all()
+        if "N/A" in genders:
+            games += gamequery.filter().all()
+        unq_games = dict([(g.id, g) for g in games])
+        games = unq_games.values()
         return render_template('browse.html', games=games, args=args)
     return render_template('browse.html', args=args)
 
