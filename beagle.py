@@ -217,12 +217,12 @@ def browse():
         if "N/A" not in ages:
             for item in ages:
                 games += gamequery.filter(Game.age==item).all()
-        if "N/A" in genders:
+        if "N/A" in ages:
             games += gamequery.filter().all()
         if "N/A" not in statuses:
             for item in statuses:
                 games += gamequery.filter(Game.status==item).all()
-        if "N/A" in genders:
+        if "N/A" in statuses:
             games += gamequery.filter().all()
         unq_games = dict([(g.id, g) for g in games])
         games = unq_games.values()
