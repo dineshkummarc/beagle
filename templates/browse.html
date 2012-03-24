@@ -4,19 +4,19 @@
       <form class="well form-vertical" autocomplete="off" action="{{ url_for('browse') }}" method=GET>
       <label><h4>Sort Games</h4></label>
         <select name="ages" multiple="multiple" >
-          {% for opt in ["N/A", "13-20", "22-35", "26-34", "35-55", "55+"] %}
+          {% for opt in ["All", "13-20", "22-35", "26-34", "35-55", "55+"] %}
           <option value="{{ opt }}" {% if args.get('age') == opt %}selected='selected'{% endif %}>{{ opt }}</option>
           {% endfor %}
         </select><span class="help-inline muted">Age</span>
         <br><br>
         <select name="genders" multiple="multiple" >
-          {% for opt in ["N/A", "Male", "Female"] %}
+          {% for opt in ["All", "Male", "Female"] %}
           <option value="{{ opt }}" {% if args.get('gender') == opt %}selected='selected'{% endif %}>{{ opt }}</option>
           {% endfor %}
         </select><span class="help-inline muted">Gender</span>
         <br><br>
         <select name="statuses" multiple="multiple" >
-          {% for opt in ["N/A", "Initial Discussion", "Delayed Integration", "Integrating", "Testing", "Live", "Dormant"] %}
+          {% for opt in ["All", "Initial Discussion", "Delayed Integration", "Integrating", "Testing", "Live", "Dormant"] %}
           <option value="{{ opt }}" {% if args.get('status') == opt %}selected='selected'{% endif %}>{{ opt }}</option>
           {% endfor %}
         </select><span class="help-inline muted">Status</span>
