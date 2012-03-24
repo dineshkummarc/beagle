@@ -207,22 +207,21 @@ def browse():
         ages = [request.args.get('ages')]
         statuses = [request.args.get('statuses')]
         gamequery = Game.query.order_by(Game.created)
-        app.logger.info(ages)
         games = []
-        if "N/A" not in genders:
+        if "All" not in genders:
             for item in genders:
                 games += gamequery.filter(Game.gender==item).all()
-        if "N/A" in genders:
+        if "All" in genders:
             games += gamequery.filter().all()
-        if "N/A" not in ages:
+        if "All" not in ages:
             for item in ages:
                 games += gamequery.filter(Game.age==item).all()
-        if "N/A" in ages:
+        if "All" in ages:
             games += gamequery.filter().all()
-        if "N/A" not in statuses:
+        if "All" not in statuses:
             for item in statuses:
                 games += gamequery.filter(Game.status==item).all()
-        if "N/A" in statuses:
+        if "All" in statuses:
             games += gamequery.filter().all()
         unq_games = dict([(g.id, g) for g in games])
         games = unq_games.values()
