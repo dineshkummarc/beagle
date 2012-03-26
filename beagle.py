@@ -263,7 +263,9 @@ def add_contact():
             return redirect('/search?query=%s' % form.email.data)
         except:
             flash('Something went wrong! We couldn\'t add your contact!', 'alert-danger')
-        return redirect('/lead/%s' % contact.lead_id)
+        if request.args.get('state') == 'exist':
+            return redirect('/lead/%s' % contact.lead_id)
+        return redirect('/new/game/%s' % contact.lead_id)
 
 @app.route("/update/lead", methods=['POST'])
 @auth_required('user')

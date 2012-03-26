@@ -103,7 +103,7 @@
     <button class="btn-success btn" data-toggle="collapse" data-target="#add-contact">Add Contact</button>
     <div id="add-contact" class="collapse">
     <br>
-      <form class="well form-vertical" autocomplete="off" action="{{ url_for('add_contact') }}" method=POST>
+      <form class="well form-vertical" autocomplete="off" action="{{ url_for('add_contact') }}?state=existing" method=POST>
       <label><h4>Add a Contact to {{ lead.developer }}</h4></label>
         <input type="hidden" name="lead_id" class="span3" value="{{ lead.id }}">
         <br>
