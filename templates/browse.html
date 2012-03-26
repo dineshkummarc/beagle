@@ -2,22 +2,22 @@
 {% block title %}Browse Games{% endblock %}
 {% block content %}
       <form class="well form-vertical" autocomplete="off" action="{{ url_for('browse') }}" method=GET>
-      <label><h4>Sort Games</h4></label>
-        <select name="ages" multiple="multiple" >
+      <label><h4>Filter Games</h4></label>
+        <select name="ages" data-placeholder="Select Some Ages" multiple="multiple" class="chzn-select">
           {% for opt in ["All", "13-20", "22-35", "26-34", "35-55", "55+"] %}
-          <option value="{{ opt }}" {% if args.get('age') == opt %}selected='selected'{% endif %}>{{ opt }}</option>
+          <option value="{{ opt }}" {% if args %}{% if opt in args.getlist('ages') %}selected='selected'{% endif %}{% endif %}>{{ opt }}</option>
           {% endfor %}
         </select><span class="help-inline muted">Age</span>
         <br><br>
-        <select name="genders" multiple="multiple" >
+        <select name="genders" data-placeholder="Select Some Genders" multiple="multiple" class="chzn-select">
           {% for opt in ["All", "Male", "Female"] %}
-          <option value="{{ opt }}" {% if args.get('gender') == opt %}selected='selected'{% endif %}>{{ opt }}</option>
+          <option value="{{ opt }}" {% if args %}{% if opt in args.getlist('genders') %}selected='selected'{% endif %}{% endif %}>{{ opt }}</option>
           {% endfor %}
         </select><span class="help-inline muted">Gender</span>
         <br><br>
-        <select name="statuses" multiple="multiple" >
+        <select name="statuses" data-placeholder="Select Some Statuses" multiple="multiple" class="chzn-select">
           {% for opt in ["All", "Initial Discussion", "Delayed Integration", "Integrating", "Testing", "Live", "Dormant"] %}
-          <option value="{{ opt }}" {% if args.get('status') == opt %}selected='selected'{% endif %}>{{ opt }}</option>
+          <option value="{{ opt }}" {% if args %}{% if opt in args.getlist('statuses') %}selected='selected'{% endif %}{% endif %}>{{ opt }}</option>
           {% endfor %}
         </select><span class="help-inline muted">Status</span>
         <br><br>

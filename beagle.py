@@ -1,17 +1,13 @@
-import os
-import base64
 import uuid
 import datetime
 import settings
-from raven.contrib.flask import Sentry
-from flask import Flask, request, redirect, url_for, session, flash, g, render_template
+from flask import Flask, request, redirect, url_for, session, flash, render_template
 from flaskext.oauth import OAuth
 from flaskext.sqlalchemy import SQLAlchemy
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy import desc
 from sqlalchemy.orm import joinedload
 from functools import wraps
-from wtforms import Form, BooleanField, TextField, PasswordField, validators, IntegerField
+from wtforms import Form, TextField, IntegerField
 
 
 # initialize the things
@@ -203,9 +199,9 @@ def search():
 def browse():
     args = request.args
     if request.method == 'GET':
-        genders = [request.args.get('genders')]
-        ages = [request.args.get('ages')]
-        statuses = [request.args.get('statuses')]
+        genders = args.getlist('genders')
+        ages = args.getlist('ages')
+        statuses = args.getlist('statuses')
         gamequery = Game.query.order_by(Game.created)
         games = []
         if "All" not in genders:
@@ -450,7 +446,6 @@ def facebook_authorized(resp):
         )
     session['oauth_token'] = (resp['access_token'], '')
     me = facebook.get('/me')
-    safe_users = settings.SAFE_USERS
     check_users = bool(me.data['id'] in settings.SAFE_USERS)
     # Check to see if the user's fb_id exists in the 'safe' list.
     # The safe list exists as an environment varaible called SAFE_USERS
