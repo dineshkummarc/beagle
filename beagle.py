@@ -223,9 +223,9 @@ def add_lead():
             db.session.commit()
             app.logger.info("The lead %s was added." % lead.developer)
             flash(u'Your lead was succesfully saved as <strong><a href=\"/lead/%s\">%s</a></strong>. It\'s automatically been assigned to you. Add a game below.' % (lead.id, lead.developer), 'alert-success')
-        except IntegrityError:
-            flash('Looks like <strong>%s</strong> was a duplicate. Search results are below!' % form.email.data, 'alert-warning')
-            return redirect('%s?query=%s' % (url_for('search'), form.email.data))
+        except:
+            flash('Something went wrong! We couldn\'t add your contact!', 'alert-danger')
+            return redirect(url_for('add_lead'))
     return redirect('/new/contact/%s' % lead.id)
 
 @app.route("/add/game", methods=['POST'])
@@ -259,10 +259,10 @@ def add_contact():
             app.logger.info("%s was added to the lead %s" % (contact.name, contact.lead.developer))
             flash(u'Your contact was succesfully added as <strong><a href=\"/lead/%s\">%s</a></strong>.' % (contact.lead_id, contact.name), 'alert-success')
         except IntegrityError:
+            flash('Looks like <strong>%s</strong> was a duplicate. Search results are below!' % form.email.data, 'alert-warning')
+            return redirect('/search?query=%s' % form.email.data)
+        except:
             flash('Something went wrong! We couldn\'t add your contact!', 'alert-danger')
-        lead = Lead.query.get(contact.lead_id)
-        if len(lead.contacts) == 1:
-            return redirect('/new/game/%s' % contact.lead_id)
         return redirect('/lead/%s' % contact.lead_id)
 
 @app.route("/update/lead", methods=['POST'])
@@ -279,9 +279,9 @@ def update_lead():
             db.session.commit()
             app.logger.info("The lead %s was updated." % lead.developer)
             flash(u'Your lead was succesfully updated as <strong><a href=\"/lead/%s\">%s</a></strong>.' % (lead.id, lead.developer), 'alert-success')
-        except IntegrityError:
-            flash('Looks like <strong>%s</strong> was a duplicate. Search results are below!' % form.email.data, 'alert-warning')
-            return redirect('%s?query=%s' % (url_for('search'), form.email.data))
+        except:
+            flash('Something went wrong! We couldn\'t add your contact!', 'alert-danger')
+            return redirect(url_for('update_lead'))
     return redirect('/lead/%s' % lead.id)
 
 @app.route("/update/game", methods=['POST'])
@@ -301,7 +301,7 @@ def update_game():
             db.session.commit()
             app.logger.info("The game %s was updated." % game.name)
             flash(u'Your game was succesfully updated as <strong><a href=\"/lead/%s\">%s</a></strong>.' % (form.lead_id.data, game.name), 'alert-success')
-        except IntegrityError:
+        except:
             flash('Something went wrong! We couldn\'t add your game!', 'alert-danger')
             return redirect('/lead/%s' % form.lead_id.data)
     return redirect('/lead/%s' % form.lead_id.data)
@@ -321,6 +321,9 @@ def update_contact():
             app.logger.info("The contact %s was updated." % contact.name)
             flash(u'Your contact was succesfully updated as <strong><a href=\"/lead/%s\">%s</a></strong>.' % (form.lead_id.data, contact.name), 'alert-success')
         except IntegrityError:
+            flash('Looks like <strong>%s</strong> was a duplicate. Search results are below!' % form.email.data, 'alert-warning')
+            return redirect('/search?query=%s' % form.email.data)
+        except:
             flash('Something went wrong! We couldn\'t add your contact!', 'alert-danger')
             return redirect('/lead/%s' % form.lead_id.data)
     return redirect('/lead/%s' % form.lead_id.data)
