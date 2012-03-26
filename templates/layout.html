@@ -7,7 +7,9 @@
     <meta name="author" content="">
     <link rel="stylesheet" href="/static/css/bootstrap.min.css" />
     <link rel="stylesheet" href="/static/css/custom.css" />
+    <link rel="stylesheet" href="/static/css/chosen.css" />
     <script src="/static/js/jquery.min.js"></script>
+    <script src="/static/js/chosen.jquery.min.js"></script>
     <script src="/static/bootstrap-alerts.js"></script>
     <script src="/static/bootstrap-dropdown.js"></script>
     <script src="/static/bootstrap-tabs.js"></script>
@@ -19,6 +21,7 @@
             $("table").tablesorter({textExtraction: 'complex'});
             $("#lead-delete").click(function(event){alert("Are you sure you want to delete this Lead? It will also delete all games and contacts!");});
             $("#game-delete").click(function(event){alert("Are you sure you want to delete this Game?");});
+            $(".chzn-select").chosen();
         }
     );
     </script>
