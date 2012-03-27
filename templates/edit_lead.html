@@ -84,6 +84,7 @@
       <form class="well form-vertical" autocomplete="off" action="{{ url_for('update_contact') }}" method=POST>
       <label><h4>Edit Contact</h4></label>
         <input type="hidden" name="lead_id" class="span3" value="{{ lead.id }}">
+        <input type="hidden" name="contact_id" class="span3" value="{{ contact.id }}">
         <br>
         <input type="text" name="name" class="span3" value="{{ contact.name }}"><span class="help-inline muted">Name of the Contact</span>
         <br>

@@ -128,6 +128,7 @@ class GameForm(Form):
 
 class ContactForm(Form):
     lead_id = TextField('lead_id')
+    contact_id = TextField('contact_id')
     name = TextField('name')
     email = TextField('email')
     phone = TextField('phone')
