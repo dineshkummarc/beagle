@@ -15,9 +15,9 @@
         <br>
         <input type="text" name="ratings" class="span3" placeholder="1500"><span class="help-inline muted">Number of Ratings</span>
         <br>
-        <select data-placeholder="Select an age range..." name="age">
-          {% for opt in ["13-20", "22-35", "26-34", "35-55", "55+"] %}
-            <option value="{{ opt }}">{{ opt }}</option>
+        <select data-placeholder="Select an age range..." name="age" multiple="multiple" class="chzn-select">
+        {% for opt in ["All", "13-20", "22-35", "26-34", "35-55", "55+"] %}
+          <option value="{{ opt }}">{{ opt }}</option>
           {% endfor %}
         </select><span class="help-inline muted">Age range</span>
         <br>
