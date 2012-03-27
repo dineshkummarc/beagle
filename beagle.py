@@ -311,7 +311,7 @@ def update_game():
 @app.route("/update/contact", methods=['POST'])
 @auth_required('user')
 def update_contact():
-    form = GameForm(request.form)
+    form = ContactForm(request.form)
     if request.method == 'POST' and form.validate():
         contact = Contact.query.get(form.contact_id.data)
         contact.name = form.name.data
