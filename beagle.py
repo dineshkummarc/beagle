@@ -7,7 +7,7 @@ from flaskext.sqlalchemy import SQLAlchemy
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import joinedload
 from functools import wraps
-from wtforms import Form, TextField, IntegerField
+from wtforms import Form, TextField, IntegerField, SelectMultipleField
 
 
 # initialize the things
@@ -20,7 +20,11 @@ app.config['SQLALCHEMY_DATABASE_URI'] = settings.DATABASE_URL
 db = SQLAlchemy(app)
 
 # base model
-# todo
+
+attributes = db.Table('attributes',
+    db.Column('gameattribute_id', db.Integer, db.ForeignKey('gameattribute.id')),
+    db.Column('game_id', db.Integer, db.ForeignKey('game.id'))
+)
 
 class User(db.Model):
     id = db.Column(db.String(36), primary_key=True)
@@ -81,12 +85,14 @@ class Game(db.Model):
     status = db.Column(db.String(80), index=True)
     ratings = db.Column(db.Integer)
     dau = db.Column(db.Integer)
-    age = db.Column(db.String(80))
-    gender = db.Column(db.String(80))
+    age = db.Column(db.PickleType)
+    gender = db.Column(db.PickleType)
     platform = db.Column(db.String(80))
     modified = db.Column(db.DateTime, default=datetime.datetime.utcnow(), onupdate=datetime.datetime.utcnow(), index=True)
     created = db.Column(db.DateTime, default=datetime.datetime.utcnow(), index=True)
     lead_id = db.Column(db.String(36), db.ForeignKey('lead.id'))
+    attributes = db.relationship('GameAttribute', secondary=attributes, backref=db.backref('games', lazy='dynamic'))
+
 
     lead = db.relationship(Lead, backref='games', lazy='joined')
 
@@ -103,6 +109,13 @@ class Game(db.Model):
         if id is None:
             self.id = str(uuid.uuid4()).replace('-', '')
 
+class GameAttribute(db.Model):
+    id = db.Column(db.String(36), primary_key=True, default=(str(uuid.uuid4()).replace('-', '')))
+    status = db.Column(db.String(80), index=True)
+    ages = db.Column(db.String(80), index=True)
+    premium = db.Column(db.Integer)
+    flagged = db.Column(db.Integer)
+
 # Forms
 
 class LeadForm(Form):
@@ -118,8 +131,8 @@ class GameForm(Form):
     name = TextField('name')
     status = TextField('status')
     ratings = IntegerField('ratings')
-    age = TextField('age')
-    gender = TextField('gender')
+    age = SelectMultipleField('age')
+    gender = SelectMultipleField('gender')
     platform = TextField('platform')
 
 class ContactForm(Form):
@@ -198,29 +211,22 @@ def search():
 @auth_required('user')
 def browse():
     args = request.args
-    if request.method == 'GET':
+    if request.method == 'GET' and args:
         genders = args.getlist('genders')
         ages = args.getlist('ages')
         statuses = args.getlist('statuses')
         gamequery = Game.query.order_by(Game.created)
-        games = []
+        game_filter = gamequery.filter()
         if "All" not in genders:
             for item in genders:
-                games += gamequery.filter(Game.gender==item).all()
-        if "All" in genders:
-            games += gamequery.filter().all()
+                game_filter = game_filter.filter(Game.gender==item)
         if "All" not in ages:
             for item in ages:
-                games += gamequery.filter(Game.age==item).all()
-        if "All" in ages:
-            games += gamequery.filter().all()
+                game_filter = game_filter.filter(Game.age==item)
         if "All" not in statuses:
             for item in statuses:
-                games += gamequery.filter(Game.status==item).all()
-        if "All" in statuses:
-            games += gamequery.filter().all()
-        unq_games = dict([(g.id, g) for g in games])
-        games = unq_games.values()
+                game_filter = game_filter.filter(Game.status==item)
+        games = game_filter.all()
         return render_template('browse.html', games=games, args=args)
     return render_template('browse.html', args=args)
 
@@ -244,7 +250,8 @@ def add_lead():
 @auth_required('user')
 def add_game():
     form = GameForm(request.form)
-    if request.method == 'POST' and form.validate():
+    print form.age.data
+    if request.method == 'POST':
         game = Game(form.name.data, form.lead_id.data, form.status.data, form.ratings.data, form.age.data, form.gender.data, form.platform.data)
         try:
             db.session.add(game)
