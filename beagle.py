@@ -367,6 +367,13 @@ def delete_lead(id):
     for game in lead.games:
         game = Game.query.get(game.id)
         db.session.delete(game)
+        app.logger.info("The game %s was deleted." % game.name)
+        flash(u'The game %s was succesfully deleted' % (game.name), 'alert-danger')
+    for contact in lead.contacts:
+        contact = Contact.query.get(contact.id)
+        db.session.delete(contact)
+        app.logger.info("The contact %s was deleted." % contact.name)
+        flash(u'The contact %s was succesfully deleted' % (contact.name), 'alert-danger')
     try:
         db.session.delete(lead)
         db.session.commit()
