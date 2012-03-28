@@ -22,8 +22,8 @@ db = SQLAlchemy(app)
 # base model
 
 attributes = db.Table('attributes',
-    db.Column('gameattribute_id', db.Integer, db.ForeignKey('gameattribute.id')),
-    db.Column('game_id', db.Integer, db.ForeignKey('game.id'))
+    db.Column('attribute_id', db.Integer, db.ForeignKey('attribute.id')),
+    db.Column('game_id', db.String(36), db.ForeignKey('game.id'))
 )
 
 class User(db.Model):
@@ -91,10 +91,9 @@ class Game(db.Model):
     modified = db.Column(db.DateTime, default=datetime.datetime.utcnow(), onupdate=datetime.datetime.utcnow(), index=True)
     created = db.Column(db.DateTime, default=datetime.datetime.utcnow(), index=True)
     lead_id = db.Column(db.String(36), db.ForeignKey('lead.id'))
-    attributes = db.relationship('GameAttribute', secondary=attributes, backref=db.backref('games', lazy='dynamic'))
-
 
     lead = db.relationship(Lead, backref='games', lazy='joined')
+    attributes = db.relationship('Attribute', secondary=attributes, backref=db.backref('games', lazy='dynamic'))
 
     def __init__(self, name=name, lead_id=lead_id, status=status, ratings=ratings, age=age, gender=gender, platform=platform, dau=None, id=None):
         self.name = name
@@ -109,8 +108,8 @@ class Game(db.Model):
         if id is None:
             self.id = str(uuid.uuid4()).replace('-', '')
 
-class GameAttribute(db.Model):
-    id = db.Column(db.String(36), primary_key=True, default=(str(uuid.uuid4()).replace('-', '')))
+class Attribute(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
     status = db.Column(db.String(80), index=True)
     ages = db.Column(db.String(80), index=True)
     premium = db.Column(db.Integer)
