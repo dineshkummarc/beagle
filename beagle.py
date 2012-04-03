@@ -21,8 +21,13 @@ db = SQLAlchemy(app)
 
 # base model
 
-attributes = db.Table('attributes',
-    db.Column('attribute_id', db.Integer, db.ForeignKey('attribute.id')),
+ages = db.Table('ages',
+    db.Column('age_id', db.Integer, db.ForeignKey('age.id')),
+    db.Column('game_id', db.String(36), db.ForeignKey('game.id'))
+)
+
+genders = db.Table('genders',
+    db.Column('gender_id', db.Integer, db.ForeignKey('gender.id')),
     db.Column('game_id', db.String(36), db.ForeignKey('game.id'))
 )
 
@@ -93,27 +98,35 @@ class Game(db.Model):
     lead_id = db.Column(db.String(36), db.ForeignKey('lead.id'))
 
     lead = db.relationship(Lead, backref='games', lazy='joined')
-    attributes = db.relationship('Attribute', secondary=attributes, backref=db.backref('games', lazy='dynamic'))
+    ages = db.relationship('Age', secondary=ages, backref=db.backref('games', lazy='dynamic'))
+    genders = db.relationship('Gender', secondary=genders, backref=db.backref('games', lazy='dynamic'))
 
-    def __init__(self, name=name, lead_id=lead_id, status=status, ratings=ratings, age=age, gender=gender, platform=platform, dau=None, id=None):
+    def __init__(self, name=name, lead_id=lead_id, status=status, ratings=ratings, platform=platform, ages=ages, genders=genders, dau=None, id=None):
         self.name = name
         self.lead_id = lead_id
         self.status = status
         self.ratings = ratings
-        self.gender = gender
-        self.age = age
         self.platform = platform
+        self.ages = ages
+        self.genders = genders
         if dau is None:
             self.dau = int(self.ratings * float(settings.RATINGS_MULTIPLIER))
         if id is None:
             self.id = str(uuid.uuid4()).replace('-', '')
 
-class Attribute(db.Model):
+class Age(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    status = db.Column(db.String(80), index=True)
-    ages = db.Column(db.String(80), index=True)
-    premium = db.Column(db.Integer)
-    flagged = db.Column(db.Integer)
+    name = db.Column(db.String(40))
+
+    def __init__(self, name):
+        self.name = name
+
+class Gender(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(40))
+
+    def __init__(self, name):
+        self.name = name
 
 # Forms
 
