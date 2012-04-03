@@ -40,6 +40,7 @@
           <th class="blue">Lead</th>
           <th class="blue">Owner</th>
           <th class="blue">Integration Date</th>
+          <th class="blue">Owner</th>
         </tr>
   </thead>
   <tbody>
@@ -53,6 +54,7 @@
             <td><a href="/lead/{{ game.lead_id }}">{{ game.lead.developer }}</a></td>
             <td><a href="/user/{{ game.lead.user.id }}">{{ game.lead.user.name }}</a></td>
             <td>{{ game.int_date }}</td>
+            <td><a href="/user/{{ game.lead.user.id }}">{{ game.lead.user.name }}</a></td>
           </tr>
   {% endfor %}
   </tbody>
