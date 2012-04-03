@@ -4,6 +4,8 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/test.db'
 rando = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10']
 
 def fill_db():
+	ages = [Age('13-20'), Age('22-36')]
+	genders = [Gender('Male')]
 	for rand in rando:
 		user = User('11111%s' % rand, 'User Name %s' % rand, 'user%s@kiip.me' % rand)
 		db.session.add(user)
@@ -15,8 +17,6 @@ def fill_db():
 		db.session.commit()
 	for rand in rando:
 		lead = Lead.query.filter_by(developer='Developer %s' % rand).first()
-		ages = [Age('13-20'), Age('22-36')]
-		genders = [Gender('Male')]
 		game = Game('Game %s' % rand, lead.id, 'Initial Discussion', 1500, 'iOS', ages, genders)
 		db.session.add(game)
 		db.session.commit()
