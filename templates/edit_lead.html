@@ -48,15 +48,15 @@
         <br>
         <input type="text" name="ratings" class="span3" value="{{ game.ratings }}"><span class="help-inline muted">Ratings</span>
         <br>
-        <select name="age" value={{ game.age }}>
+        <select name="ages" data-placeholder="Select Some Ages" multiple="multiple" class="chzn-select">
           {% for opt in ["13-20", "22-35", "26-34", "35-55", "55+"] %}
-          <option value="{{ opt }}" {% if game.age == opt %}selected='selected'{% endif %}>{{ opt }}</option>
+          <option value="{{ opt }}" {% if game.ages %}{% if opt in game.ages %}selected='selected'{% endif %}{% endif %}>{{ opt }}</option>
           {% endfor %}
         </select><span class="help-inline muted">Age</span>
         <br>
-        <select name="gender" value="{{ game.gender }}">
+        <select name="genders" data-placeholder="Select Some Genders" multiple="multiple" class="chzn-select">
           {% for opt in ["Male", "Female"] %}
-          <option value="{{ opt }}" {% if game.gender == opt %}selected='selected'{% endif %}>{{ opt }}</option>
+          <option value="{{ opt }}" {% if game.genders %}{% if opt in game.genders %}selected='selected'{% endif %}{% endif %}>{{ opt }}</option>
           {% endfor %}
         </select><span class="help-inline muted">Gender</span>
         <br>

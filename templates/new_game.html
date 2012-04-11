@@ -15,17 +15,17 @@
         <br>
         <input type="text" name="ratings" class="span3" placeholder="1500"><span class="help-inline muted">Number of Ratings</span>
         <br>
-        <select data-placeholder="Select an age range..." name="age" multiple="multiple" class="chzn-select">
-        {% for opt in ["All", "13-20", "22-35", "26-34", "35-55", "55+"] %}
-          <option value="{{ opt }}">{{ opt }}</option>
+        <select name="ages" data-placeholder="Select Some Ages" multiple="multiple" class="chzn-select">
+          {% for opt in ["13-20", "22-35", "26-34", "35-55", "55+"] %}
+          <option value="{{ opt }}" {% if args %}{% if opt in args.getlist('ages') %}selected='selected'{% endif %}{% endif %}>{{ opt }}</option>
           {% endfor %}
-        </select><span class="help-inline muted">Age range</span>
+        </select><span class="help-inline muted">Age of Players</span>
         <br>
-        <select data-placeholder="Select a majority gender..." name="gender">
+        <select name="genders" data-placeholder="Select Some Genders" multiple="multiple" class="chzn-select">
           {% for opt in ["Male", "Female"] %}
-            <option value="{{ opt }}">{{ opt }}</option>
+          <option value="{{ opt }}" {% if args %}{% if opt in args.getlist('genders') %}selected='selected'{% endif %}{% endif %}>{{ opt }}</option>
           {% endfor %}
-        </select><span class="help-inline muted">Majority gender of players</span>
+        </select><span class="help-inline muted">Gender of Players</span>
         <br>
         <select data-placeholder="Select a Platform..." name="platform">
           {% for opt in ["iOS", "Android", "Web"] %}
