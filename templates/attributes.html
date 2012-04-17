@@ -1,11 +1,3 @@
 {% extends "layout.html" %}
-{% block title %}Edit Attributes{% endblock %}
-{% block content %}
-{% for attribute in attributes %}
-      <form class="well form-vertical" autocomplete="off" action="{{ url_for('update_lead') }}" method=POST>
-      <a href="/delete/lead/{{ lead.id }}" id='lead-delete' class="btn btn-danger pull-right">Delete Lead</a>
-      <label><h4>Edit Lead</h4></label>
-        <input type="hidden" name="{{ attribute.id }}" class="span3" value="{{ attribute.status }}">
-      </form>
-
-{% endblock %}
+{% block title %}Attributes{% endblock %}
+{% include 'includes/attributesform.html' %}

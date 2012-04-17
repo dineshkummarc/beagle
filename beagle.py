@@ -19,32 +19,60 @@ app.config.from_object(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = settings.DATABASE_URL
 db = SQLAlchemy(app)
 
+
 # base model
 
-ages = db.Table('ages',
-    db.Column('age_id', db.Integer, db.ForeignKey('age.id')),
+game_attributes = db.Table('game_attributes',
+    db.Column('attribute_id', db.Integer, db.ForeignKey('attribute.id')),
     db.Column('game_id', db.String(36), db.ForeignKey('game.id'))
 )
 
-genders = db.Table('genders',
-    db.Column('gender_id', db.Integer, db.ForeignKey('gender.id')),
+game_tags = db.Table('game_tags',
+    db.Column('tag_id', db.Integer, db.ForeignKey('tag.id')),
     db.Column('game_id', db.String(36), db.ForeignKey('game.id'))
+)
+
+lead_tags = db.Table('lead_tags',
+    db.Column('tag_id', db.Integer, db.ForeignKey('tag.id')),
+    db.Column('lead_id', db.String(36), db.ForeignKey('lead.id'))
+)
+
+contact_tags = db.Table('contact_tags',
+    db.Column('tag_id', db.Integer, db.ForeignKey('tag.id')),
+    db.Column('contact_id', db.String(36), db.ForeignKey('contact.id'))
+)
+
+attribute_genders = db.Table('attribute_genders',
+    db.Column('gender_id', db.Integer, db.ForeignKey('gender.id')),
+    db.Column('attribute_id', db.Integer, db.ForeignKey('attribute.id'))
+)
+
+attribute_ages = db.Table('attribute_ages',
+    db.Column('age_id', db.Integer, db.ForeignKey('age.id')),
+    db.Column('attribute_id', db.Integer, db.ForeignKey('attribute.id'))
+)
+
+attribute_statuses = db.Table('attribute_statuses',
+    db.Column('status_id', db.Integer, db.ForeignKey('status.id')),
+    db.Column('attribute_id', db.Integer, db.ForeignKey('attribute.id'))
 )
 
 class User(db.Model):
+    __tablename__ = 'user'
     id = db.Column(db.String(36), primary_key=True)
     fb_id = db.Column(db.String(80))
     name = db.Column(db.String(160))
     email = db.Column(db.String(80))
 
     def __init__(self, fb_id=fb_id, name=name, email=email, id=None):
+        if id is None:
+            self.id = str(uuid.uuid4()).replace('-', '')
         self.fb_id = fb_id
         self.name = name
         self.email = email
-        if id is None:
-            self.id = str(uuid.uuid4()).replace('-', '')
 
 class Lead(db.Model):
+    __tablename__ = 'lead'
     id = db.Column(db.String(36), primary_key=True)
     developer = db.Column(db.String(80), index=True)
     modified = db.Column(db.DateTime, default=datetime.datetime.utcnow(), onupdate=datetime.datetime.utcnow(), index=True)
@@ -52,18 +80,20 @@ class Lead(db.Model):
     website = db.Column(db.String(200), index=True)
     note = db.Column(db.LargeBinary)
     user_id = db.Column(db.String(36), db.ForeignKey('user.id'))
+    tags = db.relationship('Tag', secondary=lead_tags, backref=db.backref('leads', lazy='dynamic'))
 
     user = db.relationship(User, backref='leads', lazy='joined')
 
     def __init__(self, developer=developer, website=website, user_id=user_id, note=None, id=None):
+        if id is None:
+            self.id = str(uuid.uuid4()).replace('-', '')
         self.developer = developer
         self.website = website
         self.note = note
         self.user_id = user_id
-        if id is None:
-            self.id = str(uuid.uuid4()).replace('-', '')
 
 class Contact(db.Model):
+    __tablename__ = 'contact'
     id = db.Column(db.String(36), primary_key=True)
     name = db.Column(db.String(80), index=True)
     email = db.Column(db.String(80), unique=True, index=True)
@@ -72,61 +102,96 @@ class Contact(db.Model):
     modified = db.Column(db.DateTime, default=datetime.datetime.utcnow(), onupdate=datetime.datetime.utcnow(), index=True)
     created = db.Column(db.DateTime, default=datetime.datetime.utcnow(), index=True)
     lead_id = db.Column(db.String(36), db.ForeignKey('lead.id'))
+    tags = db.relationship('Tag', secondary=contact_tags, backref=db.backref('contacts', lazy='dynamic'))
 
     lead = db.relationship(Lead, backref='contacts', lazy='joined')
 
     def __init__(self, lead_id=lead_id, name=name, email=email, phone=phone, title=title, id=None):
+        if id is None:
+            self.id = str(uuid.uuid4()).replace('-', '')
         self.lead_id = lead_id
         self.name = name
         self.email = email
         self.title = title
         self.phone = phone
-        if id is None:
-            self.id = str(uuid.uuid4()).replace('-', '')
 
 class Game(db.Model):
+    __tablename__ = 'game'
     id = db.Column(db.String(36), primary_key=True)
     name = db.Column(db.String(80), index=True)
-    status = db.Column(db.String(80), index=True)
+    lead_id = db.Column(db.String(36), db.ForeignKey('lead.id'))
     ratings = db.Column(db.Integer)
     dau = db.Column(db.Integer)
-    age = db.Column(db.PickleType)
-    gender = db.Column(db.PickleType)
     platform = db.Column(db.String(80))
     modified = db.Column(db.DateTime, default=datetime.datetime.utcnow(), onupdate=datetime.datetime.utcnow(), index=True)
     created = db.Column(db.DateTime, default=datetime.datetime.utcnow(), index=True)
-    lead_id = db.Column(db.String(36), db.ForeignKey('lead.id'))
+    attributes = db.relationship('Attribute', secondary=game_attributes, backref=db.backref('games', lazy='dynamic'))
+    tags = db.relationship('Tag', secondary=game_tags, backref=db.backref('games', lazy='dynamic'))
 
     lead = db.relationship(Lead, backref='games', lazy='joined')
-    ages = db.relationship('Age', secondary=ages, backref=db.backref('games', lazy='dynamic'))
-    genders = db.relationship('Gender', secondary=genders, backref=db.backref('games', lazy='dynamic'))
 
-    def __init__(self, name=name, lead_id=lead_id, status=status, ratings=ratings, platform=platform, ages=ages, genders=genders, dau=None, id=None):
-        self.name = name
-        self.lead_id = lead_id
-        self.status = status
-        self.ratings = ratings
-        self.platform = platform
-        self.ages = ages
-        self.genders = genders
-        if dau is None:
-            self.dau = int(self.ratings * float(settings.RATINGS_MULTIPLIER))
+    def __init__(self, name=name, lead_id=lead_id, ratings=ratings, platform=platform, attributes=attributes, tags=tags, dau=None, id=None):
         if id is None:
             self.id = str(uuid.uuid4()).replace('-', '')
+        self.name = name
+        self.lead_id = lead_id
+        self.ratings = ratings
+        self.platform = platform
+        self.attributes = attributes
+        self.tags = tags
+        if dau is None:
+            self.dau = int(self.ratings * float(settings.RATINGS_MULTIPLIER))
 
 class Age(db.Model):
+    __tablename__ = 'age'
     id = db.Column(db.Integer, primary_key=True)
+    modified = db.Column(db.DateTime, default=datetime.datetime.utcnow(), onupdate=datetime.datetime.utcnow(), index=True)
+    created = db.Column(db.DateTime, default=datetime.datetime.utcnow(), index=True)
     name = db.Column(db.String(40))
 
     def __init__(self, name):
         self.name = name
 
 class Gender(db.Model):
+    __tablename__ = 'gender'
     id = db.Column(db.Integer, primary_key=True)
+    modified = db.Column(db.DateTime, default=datetime.datetime.utcnow(), onupdate=datetime.datetime.utcnow(), index=True)
+    created = db.Column(db.DateTime, default=datetime.datetime.utcnow(), index=True)
     name = db.Column(db.String(40))
 
     def __init__(self, name):
         self.name = name
+
+class Status(db.Model):
+    __tablename__ = 'status'
+    id = db.Column(db.Integer, primary_key=True)
+    modified = db.Column(db.DateTime, default=datetime.datetime.utcnow(), onupdate=datetime.datetime.utcnow(), index=True)
+    created = db.Column(db.DateTime, default=datetime.datetime.utcnow(), index=True)
+    name = db.Column(db.String(40))
+
+    def __init__(self, name):
+        self.name = name
+
+class Tag(db.Model):
+    __tablename__ = 'tag'
+    id = db.Column(db.Integer, primary_key=True)
+    modified = db.Column(db.DateTime, default=datetime.datetime.utcnow(), onupdate=datetime.datetime.utcnow(), index=True)
+    created = db.Column(db.DateTime, default=datetime.datetime.utcnow(), index=True)
+    name = db.Column(db.String(40))
+
+    def __init__(self, name):
+        self.name = name
+
+class Attribute(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    ages = db.relationship('Age', secondary=attribute_ages, backref=db.backref('attributes', lazy='dynamic'))
+    genders = db.relationship('Gender', secondary=attribute_genders, backref=db.backref('attributes', lazy='dynamic'))
+    statuses = db.relationship('Status', secondary=attribute_statuses, backref=db.backref('attributes', lazy='dynamic'))
+
+    def __init__(self, ages, genders, statuses):
+        self.ages = ages
+        self.genders = genders
+        self.statuses = statuses
 
 # Forms
 
@@ -141,10 +206,10 @@ class GameForm(Form):
     lead_id = TextField('lead_id')
     game_id = TextField('game_id')
     name = TextField('name')
-    status = TextField('status')
     ratings = IntegerField('ratings')
-    age = SelectMultipleField('age')
-    gender = SelectMultipleField('gender')
+    ages = SelectMultipleField('ages')
+    statuses = SelectMultipleField('statuses')
+    genders = SelectMultipleField('genders')
     platform = TextField('platform')
 
 class ContactForm(Form):
@@ -154,6 +219,10 @@ class ContactForm(Form):
     email = TextField('email')
     phone = TextField('phone')
     title = TextField('title')
+
+class AttributeForm(Form):
+    name = TextField('name')
+    id = IntegerField('id')
 
 # oauth settings (this can be pretty easily swapped out for twitter/github/etc.)
 
@@ -167,8 +236,12 @@ facebook = oauth.remote_app('facebook',
     request_token_params={'scope': 'email'}
 )
 
-# decorators
+# cached functions (TODO Caching)
+def get_attributes():
+    attributes = {'ages': Age.query.all(), 'genders': Gender.query.all(), 'statuses': Status.query.all(), 'tags': Tag.query.all()}
+    return attributes
 
+# decorators
 def auth_required(role):
     def decorator(f):
         @wraps(f)
@@ -193,9 +266,9 @@ def strip_http(url):
 def index():
     if not session.get('user'):
         return render_template('login.html')
-    lead_query = Lead.query.order_by(Lead.created).options(joinedload('user'))
+    lead_query = Lead.query.order_by(Lead.created.desc()).options(joinedload('user'))
     leads = lead_query.limit(10).all()
-    game_query = Game.query.order_by(Game.created).options(joinedload('lead.user'))
+    game_query = Game.query.order_by(Game.created.desc()).options(joinedload('lead.user'))
     games = game_query.limit(10).all()
     users = User.query.all()
     return render_template('index.html', leads=leads, games=games, users=users)
@@ -262,9 +335,23 @@ def add_lead():
 @auth_required('user')
 def add_game():
     form = GameForm(request.form)
-    print form.age.data
     if request.method == 'POST':
-        game = Game(form.name.data, form.lead_id.data, form.status.data, form.ratings.data, form.age.data, form.gender.data, form.platform.data)
+        genders = []
+        ages = []
+        statuses = []
+        tags = []
+        for item in form.genders.data:
+            gender = Gender.query.filter_by(name=item).first()
+            genders.append(gender)
+        for item in form.ages.data:
+            gender = Age.query.filter_by(name=item).first()
+            ages.append(gender)
+        for item in form.statuses.data:
+            gender = Status.query.filter_by(name=item).first()
+            statuses.append(gender)
+        print statuses, ages, genders
+        game_attributes = [Attribute(ages, genders, statuses)]
+        game = Game(form.name.data, form.lead_id.data, form.ratings.data, form.platform.data, game_attributes, tags)
         try:
             db.session.add(game)
             db.session.commit()
@@ -418,7 +505,7 @@ def delete_lead(id):
 @auth_required('user')
 def new_game(id):
     lead = Lead.query.get_or_404(id)
-    return render_template('new_game.html', lead=lead)
+    return render_template('new_game.html', lead=lead, attributes=get_attributes())
 
 @app.route("/new/contact/<id>")
 @auth_required('user')
@@ -438,14 +525,14 @@ def edit_lead(id):
     user = User.query.get(lead.user_id)
     users = User.query.all()
     users.remove(user)
-    return render_template('edit_lead.html', lead=lead, users=users, user=user)
+    return render_template('edit_lead.html', lead=lead, users=users, user=user, attributes=get_attributes())
 
 @app.route("/lead/<id>")
 @auth_required('user')
 def lead(id):
     lead = Lead.query.get_or_404(id)
     user = User.query.get(lead.user_id)
-    return render_template('lead.html', lead=lead, user=user)
+    return render_template('lead.html', lead=lead, user=user, attributes=get_attributes())
 
 @app.route("/user/<id>")
 @auth_required('user')
@@ -454,6 +541,25 @@ def user(id):
     user = User.query.get_or_404(id)
     return render_template('user.html', user=user, games=games)
 
+@app.route("/attributes", methods=['POST', 'GET'])
+@auth_required('user')
+def list_attributes():
+    if request.method == 'GET':
+        pass
+    if request.method == 'POST':
+        form = AttributeForm(request.form)
+        if request.args.get('type') == 'status':
+            item = Status.query.get(form.id.data)
+        if request.args.get('type') == 'age':
+            item = Age.query.get(form.id.data)
+        if request.args.get('type') == 'gender':
+            item = Gender.query.get(form.id.data)
+        if request.args.get('type') == 'tag':
+            item = Tag.query.get(form.id.data)
+        item.name = form.name.data
+        db.session.commit()
+        flash('Succesfully update attribute %s' % item.name)
+    return render_template('attributes.html', attributes=get_attributes())
 
 @app.route('/login/authorized')
 @facebook.authorized_handler

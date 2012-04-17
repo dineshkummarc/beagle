@@ -1,0 +1,20 @@
+<form class="well form-vertical" autocomplete="off" action="{{ url_for('update_lead') }}" method=POST>
+<a href="/delete/lead/{{ lead.id }}" id='lead-delete' class="btn btn-danger pull-right">Delete Lead</a>
+<label><h4>Edit Lead</h4></label>
+  <input type="hidden" name="lead_id" class="span3" value="{{ lead.id }}">
+  <input type="text" name="developer" class="span3" value="{{ lead.developer }}"><span class="help-inline muted">Developer</span>
+  <br>
+  <input type="text" name="website" class="span3" value="{{ lead.website }}"><span class="help-inline muted">Website</span>
+  <br>
+  <select name="user_id" class="chzn-select">
+    <option value="{{ user.id }}">{{ user.name }}</option>
+  {% for user in users %}
+    <option value="{{ user.id }}">{{ user.name }}</option>
+  {% endfor %}
+  </select><span class="help-inline muted">Lead Owner</span>
+  <br>
+  <textarea rows="6" name="note" class="span6">{{ lead.note }}</textarea><span class="help-inline muted">Notes for the lead</span>
+  <br>
+  <button type="submit" class="btn btn-primary">Send Changes</button>
+  <a href="/lead/{{ lead.id }}" class="btn">Cancel</a>
+</form>

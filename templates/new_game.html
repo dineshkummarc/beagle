@@ -1,39 +1,5 @@
 {% extends "layout.html" %}
 {% block title %}Add a Game{% endblock %}
 {% block content %}
-      <form class="well form-vertical" autocomplete="off" action="{{ url_for('add_game') }}" method=POST>
-      <label><h4>Add a Game to {{ lead.developer }}</h4></label>
-        <input type="hidden" name="lead_id" class="span3" value="{{ lead.id }}">
-        <br>
-        <input type="text" name="name" class="span3" placeholder="7x7"><span class="help-inline muted">Name of the game.</span>
-        <br>
-        <select data-placeholder="Select a status..." name="status">
-          {% for opt in ["Initial Discussion", "Delayed Integration", "Integrating", "Testing", "Live", "Dormant"] %}
-          <option value="{{ opt }}">{{ opt }}</option>
-          {% endfor %}
-        </select><span class="help-inline muted">Where are they at?</span>
-        <br>
-        <input type="text" name="ratings" class="span3" placeholder="1500"><span class="help-inline muted">Number of Ratings</span>
-        <br>
-        <select name="ages" data-placeholder="Select Some Ages" multiple="multiple" class="chzn-select">
-          {% for opt in ["13-20", "22-35", "26-34", "35-55", "55+"] %}
-          <option value="{{ opt }}" {% if args %}{% if opt in args.getlist('ages') %}selected='selected'{% endif %}{% endif %}>{{ opt }}</option>
-          {% endfor %}
-        </select><span class="help-inline muted">Age of Players</span>
-        <br>
-        <select name="genders" data-placeholder="Select Some Genders" multiple="multiple" class="chzn-select">
-          {% for opt in ["Male", "Female"] %}
-          <option value="{{ opt }}" {% if args %}{% if opt in args.getlist('genders') %}selected='selected'{% endif %}{% endif %}>{{ opt }}</option>
-          {% endfor %}
-        </select><span class="help-inline muted">Gender of Players</span>
-        <br>
-        <select data-placeholder="Select a Platform..." name="platform">
-          {% for opt in ["iOS", "Android", "Web"] %}
-          <option value="{{ opt }}">{{ opt }}</option>
-          {% endfor %}
-        </select><span class="help-inline muted">What platform are they on?</span>
-        <br>
-        <button type="submit" class="btn btn-primary">Submit</button>
-        <a href="/" class="btn">Cancel</a>
-      </form>
+{% include 'includes/gameform.html' %}
 {% endblock %}
