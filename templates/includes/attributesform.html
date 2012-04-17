@@ -1,0 +1,50 @@
+<div class="well">
+<button class="btn-success btn" data-toggle="collapse" data-target="#status">Statuses</button>
+<div id="status" class="collapse">
+<br>
+{% for item in attributes.get('statuses') %}
+<form class="form-horizontal" autocomplete="off" action="{{ url_for('list_attributes') }}?type=status" method=POST>
+<input type='text' name='name' value='{{ item.name }}'></input>
+<input type='hidden' name='id' value='{{ item.id }}'></input>
+<button type="submit" class="btn btn-primary">Update Attributes</button>
+</form>
+{% endfor %}
+</div>
+<br>
+<button class="btn-success btn" data-toggle="collapse" data-target="#age">Ages</button>
+<div id="age" class="collapse">
+<br>
+{% for item in attributes.get('ages') %}
+<form class="form-horizontal" autocomplete="off" action="{{ url_for('list_attributes') }}?type=age" method=POST>
+<input type='text' name='name' value='{{ item.name }}'></input>
+<input type='hidden' name='id' value='{{ item.id }}'></input>
+<button type="submit" class="btn btn-primary">Update Attributes</button>
+</form>
+{% endfor %}
+</div>
+<br>
+<button class="btn-success btn" data-toggle="collapse" data-target="#gender">Genders</button>
+<div id="gender" class="collapse">
+<br>
+{% for item in attributes.get('genders') %}
+<form class="form-horizontal" autocomplete="off" action="{{ url_for('list_attributes') }}?type=gender" method=POST>
+<input type='text' name='name' value='{{ item.name }}'></input>
+<input type='hidden' name='id' value='{{ item.id }}'></input>
+<button type="submit" class="btn btn-primary">Update Attributes</button>
+</form>
+{% endfor %}
+</div>
+<br>
+<button class="btn-success btn" data-toggle="collapse" data-target="#tag">Tags</button>
+<div id="tag" class="collapse">
+<br>
+{% for item in attributes.get('tags') %}
+<form class="form-horizontal" autocomplete="off" action="{{ url_for('list_attributes') }}?type=tag" method=POST>
+<input type='text' name='name' value='{{ item.name }}'></input>
+<input type='hidden' name='id' value='{{ item.id }}'></input>
+<button type="submit" class="btn btn-primary">Update Attributes</button>
+</form>
+{% endfor %}
+</div>
+<br>
+</div>

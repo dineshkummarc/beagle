@@ -1,0 +1,33 @@
+<form class="well form-vertical" autocomplete="off" action="{{ url_for('add_game') }}" method=POST>
+  <input type="hidden" name="lead_id" class="span3" value="{{ lead.id }}">
+  <input type="text" name="name" class="span3" placeholder="7x7"><span class="help-inline muted">Name of Game</span>
+  <br>
+  <select name="statuses" data-placeholder="Select Some Statuses" class="chzn-select">
+    {% for status in attributes.get('statuses') %}
+    <option value="{{ status.name }}">{{ status.name }}</option>
+    {% endfor %}
+  </select><span class="help-inline muted">Status</span>
+  <br>
+  <input type="text" name="ratings" class="span3" placeholder="Number of Ratings"><span class="help-inline muted">Ratings</span>
+  <br>
+  <select name="ages" data-placeholder="Select Some Ages" multiple="multiple" class="chzn-select">
+    {% for age in attributes.get('ages') %}
+    <option value="{{ age.name }}">{{ age.name }}</option>
+    {% endfor %}
+  </select><span class="help-inline muted">Age</span>
+  <br>
+  <select name="genders" data-placeholder="Select Some Genders" multiple="multiple" class="chzn-select">
+    {% for gender in attributes.get('genders') %}
+    <option value="{{ gender.name }}">{{ gender.name }}</option>
+    {% endfor %}
+  </select><span class="help-inline muted">Gender</span>
+  <br>
+  <select data-placeholder="Select a Platform..." name="platform" class="chzn-select">
+      {% for opt in ["iOS", "Android", "Web"] %}
+      <option value="{{ opt }}">{{ opt }}</option>
+      {% endfor %}
+  </select><span class="help-inline muted">What platform are they on?</span>
+  <br>
+  <button type="submit" class="btn btn-primary">Add Game</button>
+  <a href="/lead/{{ lead.id }}" class="btn">Cancel</a>
+</form>

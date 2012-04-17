@@ -1,19 +1,5 @@
 {% extends "layout.html" %}
 {% block title %}Add a Contact{% endblock %}
 {% block content %}
-      <form class="well form-vertical" autocomplete="off" action="{{ url_for('add_contact') }}" method=POST>
-      <label><h4>Add a Contact to {{ lead.developer }}</h4></label>
-        <input type="hidden" name="lead_id" class="span3" value="{{ lead.id }}">
-        <br>
-        <input type="text" name="name" class="span3" placeholder="Jack Pearkes"><span class="help-inline muted">Name of the Contact</span>
-        <br>
-        <input type="text" name="email" class="span3" placeholder="jack@kiip.me"><span class="help-inline muted">Email</span>
-        <br>
-        <input type="text" name="phone" class="span3" placeholder="415-508-7396"><span class="help-inline muted">Phone number</span>
-        <br>
-        <input type="text" name="title" class="span3" placeholder="Developer Advocate"><span class="help-inline muted">Title</span>
-        <br>
-        <button type="submit" class="btn btn-primary">Submit</button>
-        <a href="/" class="btn">Cancel</a>
-      </form>
+{% include 'includes/contactform.html' %}
 {% endblock %}

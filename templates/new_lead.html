@@ -1,13 +1,5 @@
 {% extends "layout.html" %}
 {% block title %}Add a Lead{% endblock %}
 {% block content %}
-      <form class="well form-vertical" autocomplete="off" action="{{ url_for('add_lead') }}" method=POST>
-      <label><h4>Add a new Lead</h4></label>
-        <input type="text" name="developer" class="span3" placeholder="En Masse LLC"><span class="help-inline muted">Developer</span>
-        <br>
-        <input type="text" name="website" class="span3" placeholder="kiip.me"><span class="help-inline muted">Website</span>
-        <br>
-        <button type="submit" class="btn btn-primary">Submit</button>
-        <a href="/" class="btn">Cancel</a>
-      </form>
+{% include 'includes/leadform.html' %}
 {% endblock %}

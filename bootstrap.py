@@ -1,11 +1,14 @@
-from beagle import db, app, User, Game, Lead, Contact, Age, Gender
+from beagle import db, app, User, Game, Lead, Contact, Tag, Age, Gender, Status, Attribute
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/test.db'
 rando = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10']
 
 def fill_db():
-	ages = [Age('13-20'), Age('22-36')]
-	genders = [Gender('Male')]
+	# do the initial attributes
+	attributes = [Age('13-20'), Age('22-35'), Age('26-34'), Age('35-55'), Age('55+'), Gender('Male'), Gender('Female'), Status('Initial Discussion'), Status('Delayed Integration'), Status('Integrating'), Status('Testing'), Status('Live'), Status('Dormant'), Tag('Featured'), Tag('Spotlight')]
+	for attribute in attributes:
+		db.session.add(attribute)
+		db.session.commit()
 	for rand in rando:
 		user = User('11111%s' % rand, 'User Name %s' % rand, 'user%s@kiip.me' % rand)
 		db.session.add(user)
@@ -17,7 +20,12 @@ def fill_db():
 		db.session.commit()
 	for rand in rando:
 		lead = Lead.query.filter_by(developer='Developer %s' % rand).first()
-		game = Game('Game %s' % rand, lead.id, 'Initial Discussion', 1500, 'iOS', ages, genders)
+		ages = [Age.query.filter_by(name='13-20').first()]
+		genders = [Gender.query.filter_by(name='Male').first(), Gender.query.filter_by(name='Female').first()]
+		statuses = [Status.query.filter_by(name='Initial Discussion').first()]
+		game_attributes = [Attribute(ages, genders, statuses)]
+		tags = [Tag.query.filter_by(name='Featured').first()]
+		game = Game('Game %s' % rand, lead.id, 1500, 'iOS', game_attributes, tags)
 		db.session.add(game)
 		db.session.commit()
 	for rand in rando:
