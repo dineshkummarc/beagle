@@ -73,7 +73,7 @@ class Lead(db.Model):
     modified = db.Column(db.DateTime, default=datetime.datetime.utcnow(), onupdate=datetime.datetime.utcnow(), index=True)
     created = db.Column(db.DateTime, default=datetime.datetime.utcnow(), index=True)
     website = db.Column(db.String(200), index=True)
-    note = db.Column(db.LargeBinary)
+    note = db.Column(db.Text)
     user_id = db.Column(db.String(36), db.ForeignKey('user.id'))
     tags = db.relationship('Tag', secondary=lead_tags, backref=db.backref('leads', lazy='dynamic'))
 
