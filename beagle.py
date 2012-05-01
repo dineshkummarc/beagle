@@ -22,11 +22,6 @@ db = SQLAlchemy(app)
 
 # base model
 
-game_attributes = db.Table('game_attributes',
-    db.Column('attribute_id', db.Integer, db.ForeignKey('attribute.id')),
-    db.Column('game_id', db.String(36), db.ForeignKey('game.id'))
-)
-
 game_tags = db.Table('game_tags',
     db.Column('tag_id', db.Integer, db.ForeignKey('tag.id')),
     db.Column('game_id', db.String(36), db.ForeignKey('game.id'))
@@ -42,19 +37,19 @@ contact_tags = db.Table('contact_tags',
     db.Column('contact_id', db.String(36), db.ForeignKey('contact.id'))
 )
 
-attribute_genders = db.Table('attribute_genders',
+game_genders = db.Table('game_genders',
     db.Column('gender_id', db.Integer, db.ForeignKey('gender.id')),
-    db.Column('attribute_id', db.Integer, db.ForeignKey('attribute.id'))
+    db.Column('game_id', db.String(36), db.ForeignKey('game.id'))
 )
 
-attribute_ages = db.Table('attribute_ages',
+game_ages = db.Table('game_ages',
     db.Column('age_id', db.Integer, db.ForeignKey('age.id')),
-    db.Column('attribute_id', db.Integer, db.ForeignKey('attribute.id'))
+    db.Column('game_id', db.String(36), db.ForeignKey('game.id'))
 )
 
-attribute_statuses = db.Table('attribute_statuses',
+game_statuses = db.Table('game_statuses',
     db.Column('status_id', db.Integer, db.ForeignKey('status.id')),
-    db.Column('attribute_id', db.Integer, db.ForeignKey('attribute.id'))
+    db.Column('game_id', db.String(36), db.ForeignKey('game.id'))
 )
 
 class User(db.Model):
@@ -125,19 +120,24 @@ class Game(db.Model):
     platform = db.Column(db.String(80))
     modified = db.Column(db.DateTime, default=datetime.datetime.utcnow(), onupdate=datetime.datetime.utcnow(), index=True)
     created = db.Column(db.DateTime, default=datetime.datetime.utcnow(), index=True)
-    attributes = db.relationship('Attribute', secondary=game_attributes, backref=db.backref('games', lazy='dynamic'))
     tags = db.relationship('Tag', secondary=game_tags, backref=db.backref('games', lazy='dynamic'))
+    ages = db.relationship('Age', secondary=game_ages, backref=db.backref('games', lazy='dynamic'))
+    genders = db.relationship('Gender', secondary=game_genders, backref=db.backref('games', lazy='dynamic'))
+    statuses = db.relationship('Status', secondary=game_statuses, backref=db.backref('games', lazy='dynamic'))
+
 
     lead = db.relationship(Lead, backref='games', lazy='joined')
 
-    def __init__(self, name=name, lead_id=lead_id, ratings=ratings, platform=platform, attributes=attributes, tags=tags, dau=None, id=None):
+    def __init__(self, name=name, lead_id=lead_id, ratings=ratings, platform=platform, ages=ages, genders=genders, statuses=statuses, tags=tags, dau=None, id=None):
         if id is None:
             self.id = str(uuid.uuid4()).replace('-', '')
         self.name = name
         self.lead_id = lead_id
         self.ratings = ratings
         self.platform = platform
-        self.attributes = attributes
+        self.ages = ages
+        self.genders = genders
+        self.statuses = statuses
         self.tags = tags
         if dau is None:
             self.dau = int(self.ratings * float(settings.RATINGS_MULTIPLIER))
@@ -147,7 +147,7 @@ class Age(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     modified = db.Column(db.DateTime, default=datetime.datetime.utcnow(), onupdate=datetime.datetime.utcnow(), index=True)
     created = db.Column(db.DateTime, default=datetime.datetime.utcnow(), index=True)
-    name = db.Column(db.String(40))
+    name = db.Column(db.String(40), index=True)
 
     def __init__(self, name):
         self.name = name
@@ -157,7 +157,7 @@ class Gender(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     modified = db.Column(db.DateTime, default=datetime.datetime.utcnow(), onupdate=datetime.datetime.utcnow(), index=True)
     created = db.Column(db.DateTime, default=datetime.datetime.utcnow(), index=True)
-    name = db.Column(db.String(40))
+    name = db.Column(db.String(40), index=True)
 
     def __init__(self, name):
         self.name = name
@@ -167,7 +167,7 @@ class Status(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     modified = db.Column(db.DateTime, default=datetime.datetime.utcnow(), onupdate=datetime.datetime.utcnow(), index=True)
     created = db.Column(db.DateTime, default=datetime.datetime.utcnow(), index=True)
-    name = db.Column(db.String(40))
+    name = db.Column(db.String(40), index=True)
 
     def __init__(self, name):
         self.name = name
@@ -177,21 +177,10 @@ class Tag(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     modified = db.Column(db.DateTime, default=datetime.datetime.utcnow(), onupdate=datetime.datetime.utcnow(), index=True)
     created = db.Column(db.DateTime, default=datetime.datetime.utcnow(), index=True)
-    name = db.Column(db.String(40))
+    name = db.Column(db.String(40), index=True)
 
     def __init__(self, name):
         self.name = name
-
-class Attribute(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    ages = db.relationship('Age', secondary=attribute_ages, backref=db.backref('attributes', lazy='dynamic'))
-    genders = db.relationship('Gender', secondary=attribute_genders, backref=db.backref('attributes', lazy='dynamic'))
-    statuses = db.relationship('Status', secondary=attribute_statuses, backref=db.backref('attributes', lazy='dynamic'))
-
-    def __init__(self, ages, genders, statuses):
-        self.ages = ages
-        self.genders = genders
-        self.statuses = statuses
 
 # Forms
 
@@ -296,24 +285,37 @@ def search():
 @auth_required('user')
 def browse():
     args = request.args
+    games = []
+    game_filter = Game.query.order_by(Game.created)
     if request.method == 'GET' and args:
         genders = args.getlist('genders')
         ages = args.getlist('ages')
         statuses = args.getlist('statuses')
-        gamequery = Game.query.order_by(Game.created)
-        game_filter = gamequery.filter()
-        if "All" not in genders:
-            for item in genders:
-                game_filter = game_filter.filter(Game.gender==item)
-        if "All" not in ages:
-            for item in ages:
-                game_filter = game_filter.filter(Game.age==item)
-        if "All" not in statuses:
+        if statuses:
             for item in statuses:
-                game_filter = game_filter.filter(Game.status==item)
-        games = game_filter.all()
-        return render_template('browse.html', games=games, args=args)
-    return render_template('browse.html', args=args)
+                games += game_filter.filter(Status.query.order_by(name=item)).all()
+        if ages:
+            for item in ages:
+                games += game_filter.filter(Age.query.filter_by(name=item)).all()
+        if genders:
+            for item in genders:
+                games += game_filter.filter(Gender.query.filter_by(name=item)).all()
+        # for item in genders:
+        #     gender = Gender.query.filter_by(name=item).first()
+        #     for game in gender.games.all():
+        #         games.append(game)
+        # for item in ages:
+        #     age = Age.query.filter_by(name=item).first()
+        #     for game in age.games.all():
+        #         games.append(game)
+        # for item in statuses:
+        #     status = Status.query.filter_by(name=item).first()
+        #     for game in status.games.all():
+        #         games.append(game)
+        # unq_games = dict([(g.id, g) for g in games])
+        # games = unq_games.values()
+        return render_template('browse.html', games=games, args=args, attributes=get_attributes())
+    return render_template('browse.html', args=args, attributes=get_attributes())
 
 @app.route("/add/lead", methods=['POST'])
 @auth_required('user')
@@ -349,9 +351,7 @@ def add_game():
         for item in form.statuses.data:
             gender = Status.query.filter_by(name=item).first()
             statuses.append(gender)
-        print statuses, ages, genders
-        game_attributes = [Attribute(ages, genders, statuses)]
-        game = Game(form.name.data, form.lead_id.data, form.ratings.data, form.platform.data, game_attributes, tags)
+        game = Game(form.name.data, form.lead_id.data, form.ratings.data, form.platform.data, ages, genders, statuses, tags)
         try:
             db.session.add(game)
             db.session.commit()
@@ -408,13 +408,26 @@ def update_lead():
 @auth_required('user')
 def update_game():
     form = GameForm(request.form)
-    if request.method == 'POST' and form.validate():
+    if request.method == 'POST':
+        genders = []
+        ages = []
+        statuses = []
+        # tags = []
+        for item in form.genders.data:
+            gender = Gender.query.filter_by(name=item).first()
+            genders.append(gender)
+        for item in form.ages.data:
+            gender = Age.query.filter_by(name=item).first()
+            ages.append(gender)
+        for item in form.statuses.data:
+            gender = Status.query.filter_by(name=item).first()
+            statuses.append(gender)
         game = Game.query.get(form.game_id.data)
         game.name = form.name.data
-        game.status = form.status.data
         game.ratings = form.ratings.data
-        game.age = form.age.data
-        game.gender = form.gender.data
+        game.ages = ages
+        game.genders = genders
+        game.statuses = statuses
         game.platform = form.platform.data
         game.lead_id = form.lead_id.data
         try:

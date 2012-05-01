@@ -7,10 +7,9 @@
     <br>
     <input type="text" name="name" class="span3" value="{{ game.name }}"><span class="help-inline muted">Name</span>
     <br>
-    {% for attribute in game.attributes %}
     <select name="statuses" data-placeholder="Select Some Statuses" class="chzn-select">
       {% for status in attributes.get('statuses') %}
-      <option value="{{ status.name }}" {% if attribute.statuses %}{% if status in attribute.statuses %}selected='selected'{% endif %}{% endif %}>{{ status.name }}</option>
+      <option value="{{ status.name }}" {% if game.statuses %}{% if status in game.statuses %}selected='selected'{% endif %}{% endif %}>{{ status.name }}</option>
       {% endfor %}
     </select><span class="help-inline muted">Status</span>
     <br>
@@ -18,17 +17,16 @@
     <br>
     <select name="ages" data-placeholder="Select Some Ages" multiple="multiple" class="chzn-select">
       {% for age in attributes.get('ages') %}
-      <option value="{{ age.name }}" {% if attribute.ages %}{% if age in attribute.ages %}selected='selected'{% endif %}{% endif %}>{{ age.name }}</option>
+      <option value="{{ age.name }}" {% if game.ages %}{% if age in game.ages %}selected='selected'{% endif %}{% endif %}>{{ age.name }}</option>
       {% endfor %}
     </select><span class="help-inline muted">Age</span>
     <br>
     <select name="genders" data-placeholder="Select Some Genders" multiple="multiple" class="chzn-select">
       {% for gender in attributes.get('genders') %}
-      <option value="{{ gender.name }}" {% if attribute.genders %}{% if gender in attribute.genders %}selected='selected'{% endif %}{% endif %}>{{ gender.name }}</option>
+      <option value="{{ gender.name }}" {% if game.genders %}{% if gender in game.genders %}selected='selected'{% endif %}{% endif %}>{{ gender.name }}</option>
       {% endfor %}
     </select><span class="help-inline muted">Gender</span>
     <br>
-    {% endfor %}
     <select data-placeholder="Select a Platform..." name="platform" class="chzn-select">
         {% for opt in ["iOS", "Android", "Web"] %}
         <option value="{{ opt }}" {% if game.platform == opt %}selected='selected'{% endif %}>{{ opt }}</option>
