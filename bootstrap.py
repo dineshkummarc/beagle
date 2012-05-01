@@ -1,4 +1,4 @@
-from beagle import db, app, User, Game, Lead, Contact, Tag, Age, Gender, Status, Attribute
+from beagle import db, app, User, Game, Lead, Contact, Tag, Age, Gender, Status
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/test.db'
 rando = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10']
@@ -23,9 +23,8 @@ def fill_db():
 		ages = [Age.query.filter_by(name='13-20').first()]
 		genders = [Gender.query.filter_by(name='Male').first(), Gender.query.filter_by(name='Female').first()]
 		statuses = [Status.query.filter_by(name='Initial Discussion').first()]
-		game_attributes = [Attribute(ages, genders, statuses)]
 		tags = [Tag.query.filter_by(name='Featured').first()]
-		game = Game('Game %s' % rand, lead.id, 1500, 'iOS', game_attributes, tags)
+		game = Game('Game %s' % rand, lead.id, 1500, 'iOS', ages, genders, statuses, tags)
 		db.session.add(game)
 		db.session.commit()
 	for rand in rando:

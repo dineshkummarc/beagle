@@ -25,11 +25,9 @@
     {% for game in lead.games %}
     <div id="{{ game.id }}">
       <h3><a href="http://ax.search.itunes.apple.com/WebObjects/MZSearch.woa/wa/search?entity=software&amp;media=all&amp;restrict=true&amp;submit=seeAllLockups&amp;term={{ game.name }}">{{ game.name }}</a></h3>
-      {% for attribute in game.attributes %}
-      <h4><span class="muted">Genders:</span> <strong>{% for gender in attribute.genders %} {{ gender.name }} {% endfor %}</strong></h4>
-      <h4><span class="muted">Ages:</span> <strong>{% for age in attribute.ages %} {{ age.name }} {% endfor %}</strong></h4>
-      <h4><span class="muted">Status:</span> <span class="label label-success">{% for status in attribute.statuses %} {{ status.name }} {% endfor %}</span></h4>
-      {% endfor %}
+      <h4><span class="muted">Genders:</span> <strong>{% for gender in game.genders %} {{ gender.name }} {% endfor %}</strong></h4>
+      <h4><span class="muted">Ages:</span> <strong>{% for age in game.ages %} {{ age.name }} {% endfor %}</strong></h4>
+      <h4><span class="muted">Status:</span> <span class="label label-success">{% for status in game.statuses %} {{ status.name }} {% endfor %}</span></h4>
       <h4><span class="muted">Platform:</span> <strong>{{ game.platform }}</strong></h4>
       <h4><span class="muted">DAU:</span> <strong>{{ game.dau }}</strong></h4>
       <h4><span class="muted">Ratings:</span> <strong>{{ game.ratings }}</strong></h4>
