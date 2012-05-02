@@ -1,1 +1,6 @@
 VagrantFile
+Vagrantfile
+.env
+*.swp
+*.pyc
+test.db
