@@ -1,6 +1,6 @@
 #### The Beagle is a simple [CRM](http://en.wikipedia.org/wiki/Customer_relationship_management)
 
-It is a _work in progress_! But works pretty well so far.
+kidding It is a _work in progress_! But works pretty well so far.
 
 ### How to use
 
@@ -36,4 +36,3 @@ It is a _work in progress_! But works pretty well so far.
 #### TODO
 
 - Add Gunicorn for production.
-- A million features for the actual applicationNick explanation
