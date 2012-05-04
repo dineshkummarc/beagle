@@ -36,4 +36,4 @@ It is a _work in progress_! But works pretty well so far.
 #### TODO
 
 - Add Gunicorn for production.
-- A million features for the actual application
+- A million features for the actual applicationNick explanation
