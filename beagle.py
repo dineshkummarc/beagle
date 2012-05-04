@@ -8,7 +8,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import joinedload
 from functools import wraps
 from wtforms import Form, TextField, IntegerField, SelectMultipleField
-
+from sqlalchemy.sql import or_, and_
 
 # initialize the things
 
@@ -286,34 +286,44 @@ def search():
 def browse():
     args = request.args
     games = []
-    game_filter = Game.query.order_by(Game.created)
     if request.method == 'GET' and args:
         genders = args.getlist('genders')
         ages = args.getlist('ages')
         statuses = args.getlist('statuses')
-        if statuses:
-            for item in statuses:
-                games += game_filter.filter(Status.query.order_by(name=item)).all()
-        if ages:
-            for item in ages:
-                games += game_filter.filter(Age.query.filter_by(name=item)).all()
-        if genders:
-            for item in genders:
-                games += game_filter.filter(Gender.query.filter_by(name=item)).all()
-        # for item in genders:
-        #     gender = Gender.query.filter_by(name=item).first()
-        #     for game in gender.games.all():
-        #         games.append(game)
-        # for item in ages:
-        #     age = Age.query.filter_by(name=item).first()
-        #     for game in age.games.all():
-        #         games.append(game)
-        # for item in statuses:
-        #     status = Status.query.filter_by(name=item).first()
-        #     for game in status.games.all():
-        #         games.append(game)
-        # unq_games = dict([(g.id, g) for g in games])
-        # games = unq_games.values()
+
+        total_conditions = []
+
+        age_conditions = []
+        for age in ages:
+            age_obj = Age.query.filter_by(name = age).first()
+            age_conditions.append(Game.ages.contains(age_obj))
+
+        age_condition = or_(*age_conditions)
+        total_conditions.append(age_condition)
+
+        gen_conditions = []
+        for gender in genders:
+            gen_obj = Gender.query.filter_by(name = gender).first()
+            gen_conditions.append(Game.genders.contains(gen_obj))
+
+        gen_condition = or_(*gen_conditions)
+        total_conditions.append(gen_condition)
+
+        stat_conditions = []
+        for status in statuses:
+            stat_obj = Status.query.filter_by(name = status).first()
+            stat_conditions.append(Game.statuses.contains(stat_obj))
+
+        stat_condition = or_(*stat_conditions)
+        total_conditions.append(stat_condition)
+
+        final_condition = and_(*total_conditions)
+
+        result = Game.query.filter(final_condition).all();
+
+        print "There are: %s result(s)" % len(result)
+        games = result
+
         return render_template('browse.html', games=games, args=args, attributes=get_attributes())
     return render_template('browse.html', args=args, attributes=get_attributes())
 
