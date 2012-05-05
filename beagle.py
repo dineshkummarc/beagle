@@ -7,7 +7,7 @@ from flaskext.sqlalchemy import SQLAlchemy
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import joinedload
 from functools import wraps
-from wtforms import Form, TextField, IntegerField, SelectMultipleField
+from wtforms import Form, TextField, IntegerField, SelectMultipleField, validators
 from sqlalchemy.sql import or_, and_
 from dateutil.parser import *
 
@@ -190,7 +190,7 @@ class Tag(db.Model):
 
 class LeadForm(Form):
     lead_id = TextField('lead_id')
-    developer = TextField('developer')
+    developer = TextField('developer', [validators.Length(min=4, max=80), validators.Required()])
     website = TextField('website')
     note = TextField('note')
     user_id = TextField('user_id')
@@ -198,8 +198,8 @@ class LeadForm(Form):
 class GameForm(Form):
     lead_id = TextField('lead_id')
     game_id = TextField('game_id')
-    name = TextField('name')
-    ratings = IntegerField('ratings')
+    name = TextField('name', [validators.Required()])
+    ratings = IntegerField('ratings', [validators.Required(), validators.NumberRange(0, 1000000)])
     ages = SelectMultipleField('ages')
     statuses = SelectMultipleField('statuses')
     genders = SelectMultipleField('genders')
@@ -209,8 +209,8 @@ class GameForm(Form):
 class ContactForm(Form):
     lead_id = TextField('lead_id')
     contact_id = TextField('contact_id')
-    name = TextField('name')
-    email = TextField('email')
+    name = TextField('name', [validators.Length(min=4, max=80), validators.Required()])
+    email = TextField('email', [validators.Email()])
     phone = TextField('phone')
     title = TextField('title')
 
@@ -387,8 +387,8 @@ def add_game():
 @auth_required('user')
 def add_contact():
     form = ContactForm(request.form)
+    contact = Contact(form.lead_id.data, form.name.data, form.email.data, form.phone.data, form.title.data)
     if request.method == 'POST' and form.validate():
-        contact = Contact(form.lead_id.data, form.name.data, form.email.data, form.phone.data, form.title.data)
         try:
             db.session.add(contact)
             db.session.commit()
@@ -402,6 +402,10 @@ def add_contact():
         if request.args.get('state') == 'exist':
             return redirect('/lead/%s' % contact.lead_id)
         return redirect('/new/game/%s' % contact.lead_id)
+    app.logger.info("Failed validation")
+    flash('It looks like you made a mistake somewhere!');
+    lead = Lead.query.get_or_404(contact.lead_id)
+    return render_template('new_contact.html', form=form, lead=lead)
 
 @app.route("/update/lead", methods=['POST'])
 @auth_required('user')
