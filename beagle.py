@@ -9,6 +9,7 @@ from sqlalchemy.orm import joinedload
 from functools import wraps
 from wtforms import Form, TextField, IntegerField, SelectMultipleField
 from sqlalchemy.sql import or_, and_
+from dateutil.parser import *
 
 # initialize the things
 
@@ -128,7 +129,9 @@ class Game(db.Model):
 
     lead = db.relationship(Lead, backref='games', lazy='joined')
 
-    def __init__(self, name=name, lead_id=lead_id, ratings=ratings, platform=platform, ages=ages, genders=genders, statuses=statuses, tags=tags, dau=None, id=None):
+    int_date = db.Column(db.DateTime, index=True)
+
+    def __init__(self, name=name, lead_id=lead_id, ratings=ratings, platform=platform, ages=ages, genders=genders, statuses=statuses, tags=tags,int_date=int_date, dau=None, id=None):
         if id is None:
             self.id = str(uuid.uuid4()).replace('-', '')
         self.name = name
@@ -139,6 +142,7 @@ class Game(db.Model):
         self.genders = genders
         self.statuses = statuses
         self.tags = tags
+        self.int_date = int_date
         if dau is None:
             self.dau = int(self.ratings * float(settings.RATINGS_MULTIPLIER))
 
@@ -200,6 +204,7 @@ class GameForm(Form):
     statuses = SelectMultipleField('statuses')
     genders = SelectMultipleField('genders')
     platform = TextField('platform')
+    int_date = TextField('int_date')
 
 class ContactForm(Form):
     lead_id = TextField('lead_id')
@@ -361,14 +366,17 @@ def add_game():
         for item in form.statuses.data:
             gender = Status.query.filter_by(name=item).first()
             statuses.append(gender)
-        game = Game(form.name.data, form.lead_id.data, form.ratings.data, form.platform.data, ages, genders, statuses, tags)
+
+        date = parse(form.int_date.data)
+        game = Game(form.name.data, form.lead_id.data, form.ratings.data, form.platform.data, ages, genders, statuses, tags, date)
         try:
             db.session.add(game)
             db.session.commit()
             app.logger.info("The game %s was added." % game.name)
             flash(u'Your game was succesfully saved as <strong><a href=\"/lead/%s\">%s</a></strong>.' % (game.lead_id, game.name), 'alert-success')
-        except:
+        except Exception as e:
             flash('Something went wrong! We couldn\'t add your game!', 'alert-danger')
+            print e
             return redirect('/lead/%s' % form.lead_id.data)
         return redirect('/lead/%s' % game.lead_id)
     else:
@@ -440,6 +448,8 @@ def update_game():
         game.statuses = statuses
         game.platform = form.platform.data
         game.lead_id = form.lead_id.data
+
+        game.int_date = parse(form.int_date.data)
         try:
             db.session.commit()
             app.logger.info("The game %s was updated." % game.name)

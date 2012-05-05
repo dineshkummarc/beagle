@@ -1,4 +1,5 @@
 from beagle import db, app, User, Game, Lead, Contact, Tag, Age, Gender, Status
+import datetime
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/test.db'
 rando = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10']
@@ -24,7 +25,7 @@ def fill_db():
 		genders = [Gender.query.filter_by(name='Male').first(), Gender.query.filter_by(name='Female').first()]
 		statuses = [Status.query.filter_by(name='Initial Discussion').first()]
 		tags = [Tag.query.filter_by(name='Featured').first()]
-		game = Game('Game %s' % rand, lead.id, 1500, 'iOS', ages, genders, statuses, tags)
+		game = Game('Game %s' % rand, lead.id, 1500, 'iOS', ages, genders, statuses, tags, datetime.datetime.utcnow())
 		db.session.add(game)
 		db.session.commit()
 	for rand in rando:
