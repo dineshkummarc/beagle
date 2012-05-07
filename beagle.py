@@ -126,12 +126,10 @@ class Game(db.Model):
     genders = db.relationship('Gender', secondary=game_genders, backref=db.backref('games', lazy='dynamic'))
     statuses = db.relationship('Status', secondary=game_statuses, backref=db.backref('games', lazy='dynamic'))
 
-
     lead = db.relationship(Lead, backref='games', lazy='joined')
-
     int_date = db.Column(db.DateTime, index=True)
 
-    def __init__(self, name=name, lead_id=lead_id, ratings=ratings, platform=platform, ages=ages, genders=genders, statuses=statuses, tags=tags,int_date=int_date, dau=None, id=None):
+    def __init__(self, name=name, lead_id=lead_id, ratings=ratings, platform=platform, ages=ages, genders=genders, statuses=statuses, tags=tags, int_date=int_date, dau=None, id=None):
         if id is None:
             self.id = str(uuid.uuid4()).replace('-', '')
         self.name = name
@@ -203,6 +201,7 @@ class GameForm(Form):
     ages = SelectMultipleField('ages')
     statuses = SelectMultipleField('statuses')
     genders = SelectMultipleField('genders')
+    tags = SelectMultipleField('tags')
     platform = TextField('platform')
     int_date = TextField('int_date')
 
@@ -361,11 +360,14 @@ def add_game():
             gender = Gender.query.filter_by(name=item).first()
             genders.append(gender)
         for item in form.ages.data:
-            gender = Age.query.filter_by(name=item).first()
-            ages.append(gender)
+            age = Age.query.filter_by(name=item).first()
+            ages.append(age)
         for item in form.statuses.data:
-            gender = Status.query.filter_by(name=item).first()
-            statuses.append(gender)
+            status = Status.query.filter_by(name=item).first()
+            statuses.append(status)
+        for item in form.tags.data:
+            tag = Tag.query.filter_by(name=item).first()
+            tags.append(tag)
 
         date = parse(form.int_date.data)
         game = Game(form.name.data, form.lead_id.data, form.ratings.data, form.platform.data, ages, genders, statuses, tags, date)
