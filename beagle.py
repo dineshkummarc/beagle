@@ -432,7 +432,7 @@ def update_game():
         genders = []
         ages = []
         statuses = []
-        # tags = []
+        tags = []
         for item in form.genders.data:
             gender = Gender.query.filter_by(name=item).first()
             genders.append(gender)
@@ -442,12 +442,17 @@ def update_game():
         for item in form.statuses.data:
             gender = Status.query.filter_by(name=item).first()
             statuses.append(gender)
+        for item in form.tags.data:
+            tag = Tag.query.filter_by(name=item).first()
+            tags.append(tag)
+
         game = Game.query.get(form.game_id.data)
         game.name = form.name.data
         game.ratings = form.ratings.data
         game.ages = ages
         game.genders = genders
         game.statuses = statuses
+        game.tags = tags
         game.platform = form.platform.data
         game.lead_id = form.lead_id.data
 
