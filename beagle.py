@@ -80,13 +80,14 @@ class Lead(db.Model):
 
     user = db.relationship(User, backref='leads', lazy='joined')
 
-    def __init__(self, developer=developer, website=website, user_id=user_id, note=None, id=None):
+    def __init__(self, developer=developer, website=website, user_id=user_id, tags=tags, note=None, id=None):
         if id is None:
             self.id = str(uuid.uuid4()).replace('-', '')
         self.developer = developer
         self.website = website
         self.note = note
         self.user_id = user_id
+        self.tags = tags
 
 class Contact(db.Model):
     __tablename__ = 'contact'
@@ -102,7 +103,7 @@ class Contact(db.Model):
 
     lead = db.relationship(Lead, backref='contacts', lazy='joined')
 
-    def __init__(self, lead_id=lead_id, name=name, email=email, phone=phone, title=title, id=None):
+    def __init__(self, lead_id=lead_id, name=name, email=email, phone=phone, title=title, tags=tags, id=None):
         if id is None:
             self.id = str(uuid.uuid4()).replace('-', '')
         self.lead_id = lead_id
@@ -110,6 +111,7 @@ class Contact(db.Model):
         self.email = email
         self.title = title
         self.phone = phone
+        self.tags = tags
 
 class Game(db.Model):
     __tablename__ = 'game'
@@ -192,6 +194,7 @@ class LeadForm(Form):
     website = TextField('website')
     note = TextField('note')
     user_id = TextField('user_id')
+    tags = SelectMultipleField('tags')
 
 class GameForm(Form):
     lead_id = TextField('lead_id')
@@ -212,6 +215,7 @@ class ContactForm(Form):
     email = TextField('email')
     phone = TextField('phone')
     title = TextField('title')
+    tags = SelectMultipleField('tags')
 
 class AttributeForm(Form):
     name = TextField('name')
@@ -409,12 +413,20 @@ def add_contact():
 @auth_required('user')
 def update_lead():
     form = LeadForm(request.form)
-    if request.method == 'POST' and form.validate():
+    if request.method == 'POST':
         lead = Lead.query.get(form.lead_id.data)
         lead.developer = form.developer.data
         lead.website = strip_http(form.website.data)
         lead.user_id = form.user_id.data
         lead.note = str(form.note.data)
+
+        tags = []
+        for item in form.tags.data:
+            tag = Tag.query.filter_by(name=item).first()
+            tags.append(tag)
+        
+        lead.tags = tags
+
         try:
             db.session.commit()
             app.logger.info("The lead %s was updated." % lead.developer)
@@ -470,12 +482,20 @@ def update_game():
 @auth_required('user')
 def update_contact():
     form = ContactForm(request.form)
-    if request.method == 'POST' and form.validate():
+    if request.method == 'POST':
         contact = Contact.query.get(form.contact_id.data)
         contact.name = form.name.data
         contact.email = form.email.data
         contact.phone = form.phone.data
         contact.title = form.title.data
+
+        tags = []
+        for item in form.tags.data:
+            tag = Tag.query.filter_by(name=item).first()
+            tags.append(tag)
+
+        contact.tags = tags
+
         try:
             db.session.commit()
             app.logger.info("The contact %s was updated." % contact.name)

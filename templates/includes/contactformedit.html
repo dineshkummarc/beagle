@@ -13,6 +13,13 @@
     <br>
     <input type="text" name="title" class="span3" value="{{ contact.title }}"><span class="help-inline muted">Title</span>
     <br>
+    <select name="tags" data-placeholders="Select Relevent Tags" multiple="multiple" class="chzn-select">
+        {% for tag in attributes.get('tags') %}
+        <option value="{{ tag.name }}" {% if contact.tags %} {% if tag in contact.tags %} selected="selected" {% endif %} {% endif %}>
+        {{tag.name}}</option>
+        {% endfor %}
+    </select><span class="help-inline muted">Tags</span>
+    <br>
     <button type="submit" class="btn btn-primary">Send Changes</button>
     <a href="/" class="btn">Cancel</a>
   </form>
