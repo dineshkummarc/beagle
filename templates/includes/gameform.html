@@ -30,6 +30,12 @@
   <br>
   <input type="text" name="int_date"><span class="help-inline muted">Integration Date</span>
   <br>
+  <select name="tags" data-placeholder="Select Relevent Tags" multiple="multiple" class="chzn-select">
+      {% for tag in attributes.get('tags') %}
+      <option value="{{ tag.name }}">{{ tag.name }}</option>
+      {% endfor %}
+  </select><span class="help-inline muted">Tags</span>
+  <br>
   <button type="submit" class="btn btn-primary">Add Game</button>
   <a href="/lead/{{ lead.id }}" class="btn">Cancel</a>
 </form>
