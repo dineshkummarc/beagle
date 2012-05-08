@@ -119,6 +119,7 @@ class Game(db.Model):
     ratings = db.Column(db.Integer)
     dau = db.Column(db.Integer)
     platform = db.Column(db.String(80))
+    int_date = db.Column(db.DateTime, index=True)
     modified = db.Column(db.DateTime, default=datetime.datetime.utcnow(), onupdate=datetime.datetime.utcnow(), index=True)
     created = db.Column(db.DateTime, default=datetime.datetime.utcnow(), index=True)
     tags = db.relationship('Tag', secondary=game_tags, backref=db.backref('games', lazy='dynamic'))
@@ -129,7 +130,6 @@ class Game(db.Model):
 
     lead = db.relationship(Lead, backref='games', lazy='joined')
 
-    int_date = db.Column(db.DateTime, index=True)
 
     def __init__(self, name=name, lead_id=lead_id, ratings=ratings, platform=platform, ages=ages, genders=genders, statuses=statuses, tags=tags,int_date=int_date, dau=None, id=None):
         if id is None:
@@ -326,7 +326,6 @@ def browse():
 
         result = Game.query.filter(final_condition).all();
 
-        print "There are: %s result(s)" % len(result)
         games = result
 
         return render_template('browse.html', games=games, args=args, attributes=get_attributes())
@@ -376,7 +375,7 @@ def add_game():
             flash(u'Your game was succesfully saved as <strong><a href=\"/lead/%s\">%s</a></strong>.' % (game.lead_id, game.name), 'alert-success')
         except Exception as e:
             flash('Something went wrong! We couldn\'t add your game!', 'alert-danger')
-            print e
+            app.logger.error(e)
             return redirect('/lead/%s' % form.lead_id.data)
         return redirect('/lead/%s' % game.lead_id)
     else:
@@ -397,8 +396,9 @@ def add_contact():
         except IntegrityError:
             flash('Looks like <strong>%s</strong> was a duplicate. Search results are below!' % form.email.data, 'alert-warning')
             return redirect('/search?query=%s' % form.email.data)
-        except:
+        except Exception as e:
             flash('Something went wrong! We couldn\'t add your contact!', 'alert-danger')
+            app.logger.error(e)
         if request.args.get('state') == 'exist':
             return redirect('/lead/%s' % contact.lead_id)
         return redirect('/new/game/%s' % contact.lead_id)
