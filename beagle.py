@@ -9,7 +9,7 @@ from sqlalchemy.orm import joinedload
 from functools import wraps
 from wtforms import Form, TextField, IntegerField, SelectMultipleField
 from sqlalchemy.sql import or_, and_
-from dateutil.parser import *
+from dateutil.parser import parse
 
 # initialize the things
 
