@@ -1,38 +1,81 @@
-from beagle import db, app, User, Game, Lead, Contact, Tag, Age, Gender, Status
+from beagle import *
 import datetime
+import random
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/test.db'
-rando = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10']
+users = ['Jack', 'Nick', 'Yong-Soo', 'Steve']
+
+game_name_prefix = ['Awesome', 'Fun', 'Hot', 'Super', 'Amazing', '']
+game_name_genre = ['Pirate', 'Zombie', 'Management', 'Alien', 'People', 'Tower', 'Shop', '']
+game_name_postfix = ['Adventure', 'Experience', 'Game', 'Tower', 'Street', '3D', 'Kart']
+
+lead_name_prefix = ['Big', 'Fun', 'Zynga', 'Armor', 'Viking', 'Haha', 'M', 'Z']
+lead_name_postfix = ['Co', 'Inc', 'Company', 'Family', 'Group', 'Corp', '', 'Ltd']
+
+random.seed()
 
 def fill_db():
-	# do the initial attributes
-	attributes = [Age('13-20'), Age('22-35'), Age('26-34'), Age('35-55'), Age('55+'), Gender('Male'), Gender('Female'), Status('Initial Discussion'), Status('Delayed Integration'), Status('Integrating'), Status('Testing'), Status('Live'), Status('Dormant'), Tag('Featured'), Tag('Spotlight')]
-	for attribute in attributes:
+
+        plat_attr = ['iOS', 'Android', 'Web']
+        age_attr = [Age('13-20'), Age('22-35'), Age('26-34'), Age('35-55'), Age('55+')]
+        gen_attr = [Gender('Male'), Gender('Female')]
+        stat_attr = [Status('Initial Discussion'), Status('Delayed Integration'), Status('Integrating'), Status('Testing'), Status('Live'), Status('Dormant')]
+        tag_attr =[Tag('Featured'), Tag('Spotlight')]
+
+	for attribute in tag_attr+stat_attr+gen_attr+age_attr:
 		db.session.add(attribute)
 		db.session.commit()
-	for rand in rando:
-		user = User('11111%s' % rand, 'User Name %s' % rand, 'user%s@kiip.me' % rand)
-		db.session.add(user)
-		db.session.commit()
-	for rand in rando:
-		user = User.query.filter_by(name='User Name %s' % rand).first()
-		lead = Lead('Developer %s' % rand, 'kiip%s.me' % rand, user.id)
-		db.session.add(lead)
-		db.session.commit()
-	for rand in rando:
-		lead = Lead.query.filter_by(developer='Developer %s' % rand).first()
-		ages = [Age.query.filter_by(name='13-20').first()]
-		genders = [Gender.query.filter_by(name='Male').first(), Gender.query.filter_by(name='Female').first()]
-		statuses = [Status.query.filter_by(name='Initial Discussion').first()]
-		tags = [Tag.query.filter_by(name='Featured').first()]
-		game = Game('Game %s' % rand, lead.id, 1500, 'iOS', ages, genders, statuses, tags, datetime.datetime.utcnow())
-		db.session.add(game)
-		db.session.commit()
-	for rand in rando:
-		lead = Lead.query.filter_by(developer='Developer %s' % rand).first()
-		contact = Contact(lead.id, 'Contact Name %s' % rand, 'contact%s@kiip.me' % rand, '4155087396%s' % rand, 'Title %s' % rand)
-		db.session.add(contact)
-		db.session.commit()
+	
+        print "Adding users"
+        count = 0
+        for user in users:
+            user = User('11111%s' % count, user, '%s@kiip.me' % user)
+            db.session.add(user)
+            db.session.commit()
+            count = count+1
+        
+        print "Adding leads"
+        leads = []
+        for lead in range(0, 30):
+            userc = random.choice(users)
+            user = User.query.filter_by(name = userc).first()
+            leadprefix = random.choice(lead_name_prefix)
+            leadname = random.choice(game_name_prefix)+" "+leadprefix+" "+random.choice(lead_name_postfix)
+            lead = Lead(leadname, 'dev@%s.com' % leadprefix, user.id)
+            leads.append(lead)
+	    db.session.add(lead)
+	    db.session.commit()
+
+        print "Adding games"
+        for game in range(0, 50):
+	    lead = random.choice(leads)
+	    ages = get_selection(age_attr)
+            genders = get_selection(gen_attr)
+	    statuses = [random.choice(stat_attr)]
+            tags = get_selection(tag_attr)
+            platform = random.choice(plat_attr)
+            gamename = random.choice(game_name_prefix)+" "+random.choice(game_name_genre)+" "+random.choice(game_name_postfix)
+            ratings = random.randint(0, 10000)
+	    game = Game(gamename, lead.id, ratings, platform, ages, genders, statuses, tags, datetime.datetime.utcnow())
+            db.session.add(game)
+	    db.session.commit()
+	
+        print "Adding contacts"
+        count = 0
+        for contact in range(0, 40):
+	    lead = random.choice(leads)
+	    contact = Contact(lead.id, 'Contact Name', 'contact%s@example.com' % count, '4155087396', 'Title')
+	    db.session.add(contact)
+	    db.session.commit()
+            count = count+1
+
+def get_selection(attr):
+    selection = []
+    num = random.randint(0, len(attr)-1)
+    for item in range(0, num):
+        selection.append(random.choice(attr))
+
+    return selection
 
 try:
 	print "Trying to drop exisiting database."
@@ -41,6 +84,7 @@ try:
 	db.create_all()
 	print "Database created."
 	fill_db()
+        print "Done!"
 except:
 	db.create_all()
 	fill_db()
