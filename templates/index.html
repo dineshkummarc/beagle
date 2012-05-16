@@ -12,6 +12,7 @@
                       <th class="blue">Developer</th>
                       <th class="blue"># Of Games</th>
                       <th class="blue">Owner</th>
+                      <th class="blue">Date Added</th>
                     </tr>
               </thead>
               <tbody>
@@ -20,6 +21,7 @@
                       <td><a href="/lead/{{ lead.id }}">{{ lead.developer }}</a></td>
                       <td>{{ lead.games|length }}</td>
                       <td><a href="/user/{{ lead.user_id }}">{{ lead.user.name }}</a></td>
+                      <td>{{ lead.created }}</td>
                     </tr>
               {% endfor %}
               </tbody>
@@ -34,6 +36,7 @@
                    <tr>
                      <th class="blue">Game</th>
                      <th class="blue">Lead</th>
+                     <th class="blue">Date Added</th>
                    </tr>
              </thead>
              <tbody>
@@ -41,6 +44,7 @@
                    <tr>
                      <td><a href="/lead/{{ game.lead_id }}#{{ game.id }}">{{ game.name }}</a></td>
                      <td><a href="/lead/{{ game.lead_id }}">{{ game.lead.developer }}</a></td>
+                     <td>{{ game.created }}</td>
                    </tr>
              {% endfor %}
             </tbody>
