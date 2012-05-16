@@ -286,6 +286,7 @@ def search():
     games = Game.query.filter(Game.name.ilike("%" + query + "%")).all()
     return render_template('search.html', leads=leads, games=games, contacts=contacts)
 
+
 @app.route("/browse")
 @auth_required('user')
 def browse():
@@ -296,35 +297,38 @@ def browse():
         ages = args.getlist('ages')
         statuses = args.getlist('statuses')
 
-        total_conditions = []
+        all_sets = []
 
-        age_conditions = []
-        for age in ages:
-            age_obj = Age.query.filter_by(name = age).first()
-            age_conditions.append(Game.ages.contains(age_obj))
+        if not len(ages) == 0:
+            age_ids = []
+            for age in ages:
+                age_obj = Age.query.filter_by(name = age).first()
+                age_ids.append(age_obj.id)
+           
+            age_set = Game.query.join('ages').filter(Age.id.in_(age_ids)).distinct().all();
+            all_sets.append(set(age_set));
 
-        age_condition = or_(*age_conditions)
-        total_conditions.append(age_condition)
+        if not len(genders) == 0:
+            gen_ids = []
+            for gender in genders:
+                gen_obj = Gender.query.filter_by(name = gender).first()
+                gen_ids.append(gen_obj.id)
 
-        gen_conditions = []
-        for gender in genders:
-            gen_obj = Gender.query.filter_by(name = gender).first()
-            gen_conditions.append(Game.genders.contains(gen_obj))
+            gen_set = Game.query.join('genders').filter(Gender.id.in_(gen_ids)).distinct().all();
+            all_sets.append(set(gen_set));
+       
+        if not len(statuses) == 0:
+            stat_ids = []
+            for status in statuses:
+                stat_obj = Status.query.filter_by(name = status).first()
+                stat_ids.append(stat_obj.id)
 
-        gen_condition = or_(*gen_conditions)
-        total_conditions.append(gen_condition)
+            stat_set = Game.query.join('statuses').filter(Status.id.in_(stat_ids)).distinct().all();
+            all_sets.append(set(stat_set));
 
-        stat_conditions = []
-        for status in statuses:
-            stat_obj = Status.query.filter_by(name = status).first()
-            stat_conditions.append(Game.statuses.contains(stat_obj))
+        result = set.intersection(*all_sets)
 
-        stat_condition = or_(*stat_conditions)
-        total_conditions.append(stat_condition)
-
-        final_condition = and_(*total_conditions)
-
-        result = Game.query.filter(final_condition).all();
+        print len(result)
 
         games = result
 
