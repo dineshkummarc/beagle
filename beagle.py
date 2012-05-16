@@ -296,42 +296,30 @@ def browse():
         genders = args.getlist('genders')
         ages = args.getlist('ages')
         statuses = args.getlist('statuses')
-
         all_sets = []
-
         if not len(ages) == 0:
             age_ids = []
             for age in ages:
-                age_obj = Age.query.filter_by(name = age).first()
+                age_obj = Age.query.filter_by(name=age).first()
                 age_ids.append(age_obj.id)
-           
-            age_set = Game.query.join('ages').filter(Age.id.in_(age_ids)).distinct().all();
-            all_sets.append(set(age_set));
-
+            age_set = Game.query.join('ages').filter(Age.id.in_(age_ids)).distinct().all()
+            all_sets.append(set(age_set))
         if not len(genders) == 0:
             gen_ids = []
             for gender in genders:
-                gen_obj = Gender.query.filter_by(name = gender).first()
+                gen_obj = Gender.query.filter_by(name=gender).first()
                 gen_ids.append(gen_obj.id)
-
-            gen_set = Game.query.join('genders').filter(Gender.id.in_(gen_ids)).distinct().all();
-            all_sets.append(set(gen_set));
-       
+            gen_set = Game.query.join('genders').filter(Gender.id.in_(gen_ids)).distinct().all()
+            all_sets.append(set(gen_set))
         if not len(statuses) == 0:
             stat_ids = []
             for status in statuses:
-                stat_obj = Status.query.filter_by(name = status).first()
+                stat_obj = Status.query.filter_by(name=status).first()
                 stat_ids.append(stat_obj.id)
-
-            stat_set = Game.query.join('statuses').filter(Status.id.in_(stat_ids)).distinct().all();
-            all_sets.append(set(stat_set));
-
+            stat_set = Game.query.join('statuses').filter(Status.id.in_(stat_ids)).distinct().all()
+            all_sets.append(set(stat_set))
         result = set.intersection(*all_sets)
-
-        print len(result)
-
         games = result
-
         return render_template('browse.html', games=games, args=args, attributes=get_attributes())
     return render_template('browse.html', args=args, attributes=get_attributes())
 
