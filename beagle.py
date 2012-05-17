@@ -20,7 +20,6 @@ app.config.from_object(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = settings.DATABASE_URL
 db = SQLAlchemy(app)
 
-
 # base model
 
 game_tags = db.Table('game_tags',
@@ -328,6 +327,10 @@ def browse():
             all_sets.append(set(stat_set))
         result = set.intersection(*all_sets)
         games = result
+        return render_template('browse.html', games=games, args=args, attributes=get_attributes())
+
+    elif request.method == 'GET':
+        games = Game.query.all()
         return render_template('browse.html', games=games, args=args, attributes=get_attributes())
     return render_template('browse.html', args=args, attributes=get_attributes())
 
@@ -681,6 +684,15 @@ def configure_raven(app):
         except Exception, e:
             print "Unexpected error:", e
             traceback.print_exc()
+
+# Jinja custom filters
+def datetimef(value):
+    try:
+        return value.strftime('%d/%m/%y')
+    except Exception as e:
+        return value
+
+app.jinja_env.filters['datetime'] = datetimef
 
 sentry = configure_raven(app)
 
