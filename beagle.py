@@ -320,6 +320,10 @@ def browse():
         result = set.intersection(*all_sets)
         games = result
         return render_template('browse.html', games=games, args=args, attributes=get_attributes())
+
+    elif request.method == 'GET':
+        games = Game.query.all()
+        return render_template('browse.html', games=games, args=args, attributes=get_attributes())
     return render_template('browse.html', args=args, attributes=get_attributes())
 
 @app.route("/add/lead", methods=['POST'])
