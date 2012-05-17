@@ -21,7 +21,7 @@
                       <td><a href="/lead/{{ lead.id }}">{{ lead.developer }}</a></td>
                       <td>{{ lead.games|length }}</td>
                       <td><a href="/user/{{ lead.user_id }}">{{ lead.user.name }}</a></td>
-                      <td>{{ lead.created }}</td>
+                      <td>{{ lead.created|datetime }}</td>
                     </tr>
               {% endfor %}
               </tbody>
@@ -44,7 +44,7 @@
                    <tr>
                      <td><a href="/lead/{{ game.lead_id }}#{{ game.id }}">{{ game.name }}</a></td>
                      <td><a href="/lead/{{ game.lead_id }}">{{ game.lead.developer }}</a></td>
-                     <td>{{ game.created }}</td>
+                     <td>{{ game.created|datetime }}</td>
                    </tr>
              {% endfor %}
             </tbody>
