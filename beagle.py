@@ -80,7 +80,7 @@ class Lead(db.Model):
 
     user = db.relationship(User, backref='leads', lazy='joined')
 
-    def __init__(self, developer=developer, website=website, user_id=user_id, tags=tags, note=None, id=None):
+    def __init__(self, developer=developer, website=website, user_id=user_id, tags=[], note=None, id=None):
         if id is None:
             self.id = str(uuid.uuid4()).replace('-', '')
         self.developer = developer
@@ -103,7 +103,7 @@ class Contact(db.Model):
 
     lead = db.relationship(Lead, backref='contacts', lazy='joined')
 
-    def __init__(self, lead_id=lead_id, name=name, email=email, phone=phone, title=title, tags=tags, id=None):
+    def __init__(self, lead_id=lead_id, name=name, email=email, phone=phone, title=title, tags=[], id=None):
         if id is None:
             self.id = str(uuid.uuid4()).replace('-', '')
         self.lead_id = lead_id
@@ -131,7 +131,7 @@ class Game(db.Model):
     lead = db.relationship(Lead, backref='games', lazy='joined')
     int_date = db.Column(db.DateTime, index=True)
 
-    def __init__(self, name=name, lead_id=lead_id, ratings=ratings, platform=platform, ages=ages, genders=genders, statuses=statuses, tags=tags, int_date=int_date, dau=None, id=None):
+    def __init__(self, name=name, lead_id=lead_id, ratings=ratings, platform=platform, ages=ages, genders=genders, statuses=statuses, tags=[], int_date=int_date, dau=None, id=None):
         if id is None:
             self.id = str(uuid.uuid4()).replace('-', '')
         self.name = name
@@ -303,7 +303,7 @@ def browse():
         genders = args.getlist('genders')
         ages = args.getlist('ages')
         statuses = args.getlist('statuses')
-        
+
         all_sets = []
         if not len(ages) == 0:
             age_ids = []
@@ -421,7 +421,7 @@ def update_lead():
         for item in form.tags.data:
             tag = Tag.query.filter_by(name=item).first()
             tags.append(tag)
-        
+
         lead.tags = tags
 
         try:
