@@ -20,7 +20,6 @@ app.config.from_object(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = settings.DATABASE_URL
 db = SQLAlchemy(app)
 
-
 # base model
 
 game_tags = db.Table('game_tags',
@@ -649,6 +648,15 @@ def configure_raven(app):
         except Exception, e:
             print "Unexpected error:", e
             traceback.print_exc()
+
+# Jinja custom filters
+def datetimef(value):
+    try:
+        return value.strftime('%d/%m/%y')
+    except Exception as e:
+        return value
+
+app.jinja_env.filters['datetime'] = datetimef
 
 sentry = configure_raven(app)
 
