@@ -33,10 +33,16 @@
         {% endfor %}
     </select><span class="help-inline muted">What platform are they on?</span>
     <br>
-    <input type="text" name="int_date" value="{{ game.int_date }}"><span class="help-inline muted">Integration Date</span>
+    <input type="text" name="int_date" value="{{ game.int_date }}" id="dp"><span class="help-inline muted">Integration Date</span>
     <br>
     <button type="submit" class="btn btn-primary">Send Changes</button>
     <a href="/lead/{{ lead.id }}" class="btn">Cancel</a>
 </form>
 
 </div>
+
+<script>
+    $(function() {
+        $('#dp').datepicker();
+    });
+</script>
