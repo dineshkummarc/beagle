@@ -9,7 +9,7 @@ from sqlalchemy.orm import joinedload
 from functools import wraps
 from wtforms import Form, TextField, IntegerField, SelectMultipleField
 from sqlalchemy.sql import or_, and_
-from dateutil.parser import *
+from dateutil.parser import parse
 
 # initialize the things
 
@@ -121,13 +121,13 @@ class Game(db.Model):
     ratings = db.Column(db.Integer)
     dau = db.Column(db.Integer)
     platform = db.Column(db.String(80))
+    int_date = db.Column(db.DateTime, index=True)
     modified = db.Column(db.DateTime, default=datetime.datetime.utcnow(), onupdate=datetime.datetime.utcnow(), index=True)
     created = db.Column(db.DateTime, default=datetime.datetime.utcnow(), index=True)
     tags = db.relationship('Tag', secondary=game_tags, backref=db.backref('games', lazy='dynamic'))
     ages = db.relationship('Age', secondary=game_ages, backref=db.backref('games', lazy='dynamic'))
     genders = db.relationship('Gender', secondary=game_genders, backref=db.backref('games', lazy='dynamic'))
     statuses = db.relationship('Status', secondary=game_statuses, backref=db.backref('games', lazy='dynamic'))
-
     lead = db.relationship(Lead, backref='games', lazy='joined')
     int_date = db.Column(db.DateTime, index=True)
 
@@ -221,6 +221,10 @@ class AttributeForm(Form):
     name = TextField('name')
     id = IntegerField('id')
 
+class AttributeForm(Form):
+    name = TextField('name')
+    id = IntegerField('id')
+
 # oauth settings (this can be pretty easily swapped out for twitter/github/etc.)
 
 facebook = oauth.remote_app('facebook',
@@ -289,6 +293,7 @@ def search():
     games = Game.query.filter(Game.name.ilike("%" + query + "%")).all()
     return render_template('search.html', leads=leads, games=games, contacts=contacts)
 
+
 @app.route("/browse")
 @auth_required('user')
 def browse():
@@ -298,40 +303,31 @@ def browse():
         genders = args.getlist('genders')
         ages = args.getlist('ages')
         statuses = args.getlist('statuses')
-
-        total_conditions = []
-
-        age_conditions = []
-        for age in ages:
-            age_obj = Age.query.filter_by(name = age).first()
-            age_conditions.append(Game.ages.contains(age_obj))
-
-        age_condition = or_(*age_conditions)
-        total_conditions.append(age_condition)
-
-        gen_conditions = []
-        for gender in genders:
-            gen_obj = Gender.query.filter_by(name = gender).first()
-            gen_conditions.append(Game.genders.contains(gen_obj))
-
-        gen_condition = or_(*gen_conditions)
-        total_conditions.append(gen_condition)
-
-        stat_conditions = []
-        for status in statuses:
-            stat_obj = Status.query.filter_by(name = status).first()
-            stat_conditions.append(Game.statuses.contains(stat_obj))
-
-        stat_condition = or_(*stat_conditions)
-        total_conditions.append(stat_condition)
-
-        final_condition = and_(*total_conditions)
-
-        result = Game.query.filter(final_condition).all();
-
-        print "There are: %s result(s)" % len(result)
+        
+        all_sets = []
+        if not len(ages) == 0:
+            age_ids = []
+            for age in ages:
+                age_obj = Age.query.filter_by(name=age).first()
+                age_ids.append(age_obj.id)
+            age_set = Game.query.join('ages').filter(Age.id.in_(age_ids)).distinct().all()
+            all_sets.append(set(age_set))
+        if not len(genders) == 0:
+            gen_ids = []
+            for gender in genders:
+                gen_obj = Gender.query.filter_by(name=gender).first()
+                gen_ids.append(gen_obj.id)
+            gen_set = Game.query.join('genders').filter(Gender.id.in_(gen_ids)).distinct().all()
+            all_sets.append(set(gen_set))
+        if not len(statuses) == 0:
+            stat_ids = []
+            for status in statuses:
+                stat_obj = Status.query.filter_by(name=status).first()
+                stat_ids.append(stat_obj.id)
+            stat_set = Game.query.join('statuses').filter(Status.id.in_(stat_ids)).distinct().all()
+            all_sets.append(set(stat_set))
+        result = set.intersection(*all_sets)
         games = result
-
         return render_template('browse.html', games=games, args=args, attributes=get_attributes())
     return render_template('browse.html', args=args, attributes=get_attributes())
 
@@ -382,7 +378,7 @@ def add_game():
             flash(u'Your game was succesfully saved as <strong><a href=\"/lead/%s\">%s</a></strong>.' % (game.lead_id, game.name), 'alert-success')
         except Exception as e:
             flash('Something went wrong! We couldn\'t add your game!', 'alert-danger')
-            print e
+            app.logger.error(e)
             return redirect('/lead/%s' % form.lead_id.data)
         return redirect('/lead/%s' % game.lead_id)
     else:
@@ -403,8 +399,9 @@ def add_contact():
         except IntegrityError:
             flash('Looks like <strong>%s</strong> was a duplicate. Search results are below!' % form.email.data, 'alert-warning')
             return redirect('/search?query=%s' % form.email.data)
-        except:
+        except Exception as e:
             flash('Something went wrong! We couldn\'t add your contact!', 'alert-danger')
+            app.logger.error(e)
         if request.args.get('state') == 'exist':
             return redirect('/lead/%s' % contact.lead_id)
         return redirect('/new/game/%s' % contact.lead_id)

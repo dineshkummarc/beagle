@@ -54,7 +54,7 @@
             <td>{{ game.dau }}</td>
             <td>{% for age in game.ages %}{{ age.name }} {% endfor %}</td>
             <td>{% for age in game.ages %}{{ age.name }} {% endfor %}</td>
-            <td><span class="label label-success">{{ game.status }}</span></td>
+            <td>{% for status in game.statuses %}<span class="label label-success">{{ status.name }}</span>{% endfor %}</td>
           </tr>
     {% endfor %}
     </tbody>
