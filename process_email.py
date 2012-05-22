@@ -5,13 +5,17 @@
 import imaplib
 from bs4 import BeautifulSoup
 from beagle import * # I'm sorry Jack
+import os
+
+EMAIL_USERNAME = str(os.environ.get("EMAIL_USERNAME"))
+EMAIL_PASSWORD = str(os.environ.get("EMAIL_PASSWORD"))
 
 # open connection
 def get_emails():
     m = imaplib.IMAP4_SSL('imap.gmail.com')
-    m.login('beagle@kiip.me', 'kiipitreal')
+    m.login(EMAIL_PASSWORD, EMAIL_PASSWORD)
     m.select()
-    resp, data = m.search(None, "FROM", "nick@kiip.me")
+    resp, data = m.search(None, "FROM", "developers@kiip.me")
     emails = []
     for item in data[0].split():
         resp, data = m.fetch(item, '(RFC822)')
