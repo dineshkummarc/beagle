@@ -61,7 +61,7 @@ def add_contact(data):
         db.session.commit()
 
 def get_test_emails():
-    f = open('./gistfile1', 'r').read()
+    f = open('./sample_email', 'r').read()
     emails = [f]
     return emails
 
@@ -73,3 +73,6 @@ def main():
         data = add_lead(data)
         data = add_contact(data)
 
+
+if __name__ == "__main__":
+    main()
