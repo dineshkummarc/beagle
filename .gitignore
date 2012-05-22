@@ -4,3 +4,4 @@ Vagrantfile
 *.swp
 *.pyc
 test.db
+sample_email
