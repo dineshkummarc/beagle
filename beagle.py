@@ -692,7 +692,7 @@ def configure_raven(app):
 # Jinja custom filters
 def datetimef(value):
     try:
-        return value.strftime('%d/%m/%y')
+        return value.strftime('%m/%d/%y')
     except Exception as e:
         return value
 
