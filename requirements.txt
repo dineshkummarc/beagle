@@ -8,3 +8,4 @@ raven==1.4.3
 blinker==1.2
 WTForms==1.0.1
 python-dateutil==2.1
+sendgrid-python

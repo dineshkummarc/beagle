@@ -1,0 +1,59 @@
+<html>
+<div>Games that are 90% closed and have greater than 10,000 DAU:</div>
+<br>
+{% if games_10000 %}
+<table width="600">
+  	<thead style="color: gray">
+		<tr>
+			<td>Game Name</td>
+			<td>DAU</td>
+			<td>Status</td>
+			<td>Est. Integration Date</td>
+			<td>Contact</td>
+		</tr>
+	</thead>
+	<tbody>
+		{% for game in games_10000 %}
+		<tr style="border: 1px solid gray">
+			<td><a href="http://thebeagle.herokuapp.com/user/{{ game.id }}">{{ game.name }}</a></td>
+			<td>{{ game.dau }}</td>
+			<td style="color: green">{% for status in game.statuses %}{{ status.name }}{% endfor %}</td>
+			<td>{{ game.int_date.strftime("%B %d, %Y") }}</td>
+			<td><a href="http://thebeagle.herokuapp.com/user/{{ game.lead.user.id }}">{{ game.lead.user.name }}</a></td>
+        </tr>
+		{% endfor %}
+    </tbody>
+</table>
+{% else %}
+No games currently.
+{% endif %}
+<br>
+<div>Games that are 60% closed and have greater than 50,000 DAU:</div>
+<br>
+{% if games_50000 %}
+<table width="600">
+  	<thead style="color: gray">
+		<tr>
+			<td>Game Name</td>
+			<td>DAU</td>
+			<td>Status</td>
+			<td>Est. Integration Date</td>
+			<td>Contact</td>
+		</tr>
+	</thead>
+	<tbody>
+		{% for game in games_50000 %}
+		<tr style="border: 1px solid gray">
+			<td><a href="http://thebeagle.herokuapp.com/user/{{ game.id }}">{{ game.name }}</a></td>
+			<td>{{ game.dau }}</td>
+			<td style="color: green">{% for status in game.statuses %}{{ status.name }}{% endfor %}</td>
+			<td>{{ game.int_date.strftime("%B %d, %Y") }}</td>
+			<td><a href="http://thebeagle.herokuapp.com/user/{{ game.lead.user.id }}">{{ game.lead.user.name }}</a></td>
+        </tr>
+		{% endfor %}
+    </tbody>
+</table>
+{% else %}
+No games currently.
+{% endif %}
+</html>
