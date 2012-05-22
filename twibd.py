@@ -1,13 +1,9 @@
-import settings
 import sendgrid
 from datetime import date
-from beagle import Game, Status
+from beagle import Game, Status, mailsend
 from jinja2 import Environment, PackageLoader
 
 env = Environment(loader=PackageLoader('beagle', 'templates'))
-
-s = sendgrid.Sendgrid(settings.SENDGRID_USER, settings.SENDGRID_PASSWORD, secure=True)
-
 
 def todays_date():
 	today = date.today()
@@ -35,4 +31,4 @@ plain = "The TWIBD Update for %s includes new games, live games and upcoming gam
 
 message = sendgrid.Message("beagle@kiip.me", "TWIBD Update for %s" % (todays_date()), plain, html)
 message.add_to("jack@kiip.me", "Sales Team")
-s.web.send(message)
+mailsend.web.send(message)

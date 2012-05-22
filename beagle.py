@@ -1,6 +1,7 @@
 import uuid
 import datetime
 import settings
+import sendgrid
 from flask import Flask, request, redirect, url_for, session, flash, render_template
 from flaskext.oauth import OAuth
 from flaskext.sqlalchemy import SQLAlchemy
@@ -19,6 +20,7 @@ app.secret_key = settings.APP_SECRET_KEY
 app.config.from_object(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = settings.DATABASE_URL
 db = SQLAlchemy(app)
+mailsend = sendgrid.Sendgrid(settings.SENDGRID_USER, settings.SENDGRID_PASSWORD, secure=True)
 
 # base model
 
