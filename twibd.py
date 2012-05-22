@@ -1,6 +1,7 @@
+from __future__ import division
 import sendgrid
 from datetime import date
-from beagle import Game, Status, mailsend, datetimef
+from beagle import Game, Status, mailsend, datetimef, User
 from jinja2 import Environment, PackageLoader
 
 env = Environment(loader=PackageLoader('beagle', 'templates'))
@@ -18,9 +19,34 @@ def todays_date():
 	todays_date = today.strftime("%A, %B %d")
 	return todays_date
 
+def get_user_percentage():
+	user_data = []
+	users = User.query.all()
+	total_games = len(Game.query.all())
+	for user in users:
+		number_games = 0
+		for lead in user.leads:
+			number_games = number_games + len(lead.games)
+		game_percentage = (number_games / total_games) * 100
+		user_specific = {user.name: round(game_percentage)}
+		user_data.append(user_specific)
+	return user_data
+
+def make_chart_url():
+	users = []
+	percentages = []
+	user_data = get_user_percentage()
+	for user in user_data:
+		users.append(user.keys()[0])
+		percentages.append(user.values()[0])
+	percentages = ','.join(map(str, percentages))
+	users = '|'.join(map(str, users))
+	url = "https://chart.googleapis.com/chart?cht=p3&chd=t:%s&chs=350x150&chl=%s" % (percentages, users)
+	return url
+
 template = env.get_template('twibd.html')
 
-html = template.render(games_10000=get_games(10000, "Testing"), games_50000=get_games(50000, "Integrating"))
+html = template.render(games_10000=get_games(10000, "Testing"), games_50000=get_games(50000, "Integrating"), url=make_chart_url())
 
 plain = "The TWIBD Update for %s includes new games, live games and upcoming games." % (todays_date())
 
