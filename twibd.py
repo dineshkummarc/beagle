@@ -21,7 +21,11 @@ def todays_date():
 
 def get_user_percentage():
 	user_data = []
-	users = User.query.all()
+	users = []
+	all_users = User.query.all()
+	for user in all_users:
+		if len(user.leads) > 2:
+			users.append(user)
 	total_games = len(Game.query.all())
 	for user in users:
 		number_games = 0
