@@ -6,14 +6,12 @@ import imaplib
 from bs4 import BeautifulSoup
 from beagle import * # I'm sorry Jack
 import os
-
-EMAIL_USERNAME = str(os.environ.get("EMAIL_USERNAME"))
-EMAIL_PASSWORD = str(os.environ.get("EMAIL_PASSWORD"))
+import settings
 
 # open connection
 def get_emails():
     m = imaplib.IMAP4_SSL('imap.gmail.com')
-    m.login(EMAIL_PASSWORD, EMAIL_PASSWORD)
+    m.login(settings.EMAIL_PASSWORD, settings.EMAIL_PASSWORD)
     m.select()
     resp, data = m.search(None, "FROM", "developers@kiip.me")
     emails = []
@@ -47,7 +45,7 @@ def add_lead(data):
     if user == None:
         print "User not found!"
         return data
-    
+
     lead.user = user
     lead.user_id = user.id
     db.session.add(lead)
@@ -70,8 +68,8 @@ def get_test_emails():
     return emails
 
 def main():
-#    emails = get_emails()
-    emails = get_test_emails()
+    emails = get_emails()
+#    emails = get_test_emails()
     for email in emails:
         data = process_email(email)
         data = add_lead(data)
