@@ -469,8 +469,10 @@ def update_game():
         game.tags = tags
         game.platform = form.platform.data
         game.lead_id = form.lead_id.data
-
-        game.int_date = parse(form.int_date.data)
+        if game.int_date == None:
+            pass
+        else:
+            game.int_date = parse(form.int_date.data)
         try:
             db.session.commit()
             app.logger.info("The game %s was updated." % game.name)
