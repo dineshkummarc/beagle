@@ -56,7 +56,7 @@ def fill_db():
         platform = random.choice(plat_attr)
         gamename = random.choice(game_name_prefix)+" "+random.choice(game_name_genre)+" "+random.choice(game_name_postfix)
         ratings = random.randint(0, 10000)
-        game = Game(gamename, lead.id, ratings, platform, ages, genders, statuses, tags, datetime.datetime.utcnow())
+        game = Game(gamename, lead.id, ratings, platform, ages, genders, statuses, tags, datetime.date.today())
         db.session.add(game)
         db.session.commit()
 
