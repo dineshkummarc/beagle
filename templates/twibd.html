@@ -15,7 +15,7 @@
 	<tbody>
 		{% for game in games_10000 %}
 		<tr style="border: 1px solid gray">
-			<td><a href="http://thebeagle.herokuapp.com/user/{{ game.id }}">{{ game.name }}</a></td>
+			<td><a href="http://thebeagle.herokuapp.com/lead/{{ game.lead_id }}">{{ game.name }}</a></td>
 			<td>{{ game.dau }}</td>
 			<td style="color: green">{% for status in game.statuses %}{{ status.name }}{% endfor %}</td>
 			<td>{{ game.int_date|datetime }}</td>
