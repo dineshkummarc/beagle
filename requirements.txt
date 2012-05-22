@@ -8,4 +8,6 @@ raven==1.4.3
 blinker==1.2
 WTForms==1.0.1
 python-dateutil==2.1
-sendgrid-python
+sendgrid-python==0.1.0
+beautifulsoup4==4.0.5
+lxml==2.3.4

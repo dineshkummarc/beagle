@@ -20,7 +20,7 @@ def todays_date():
 
 template = env.get_template('twibd.html')
 
-html = template.render(games_10000=get_games(10000, "Testing"), games_50000=get_games(50000, "Integrating"), datetimef=datetimef)
+html = template.render(games_10000=get_games(10000, "Testing"), games_50000=get_games(50000, "Integrating"))
 
 plain = "The TWIBD Update for %s includes new games, live games and upcoming games." % (todays_date())
 
