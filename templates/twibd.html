@@ -18,7 +18,7 @@
 			<td><a href="http://thebeagle.herokuapp.com/user/{{ game.id }}">{{ game.name }}</a></td>
 			<td>{{ game.dau }}</td>
 			<td style="color: green">{% for status in game.statuses %}{{ status.name }}{% endfor %}</td>
-			<td>{{ game.int_date.strftime("%B %d, %Y") }}</td>
+			<td>{{ game.int_date|datetime }}</td>
 			<td><a href="http://thebeagle.herokuapp.com/user/{{ game.lead.user.id }}">{{ game.lead.user.name }}</a></td>
         </tr>
 		{% endfor %}
