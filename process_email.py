@@ -11,7 +11,7 @@ import settings
 # open connection
 def get_emails():
     m = imaplib.IMAP4_SSL('imap.gmail.com')
-    m.login(settings.EMAIL_PASSWORD, settings.EMAIL_PASSWORD)
+    m.login(settings.EMAIL_USERNAME, settings.EMAIL_PASSWORD)
     m.select()
     resp, data = m.search(None, "FROM", "developers@kiip.me")
     emails = []
