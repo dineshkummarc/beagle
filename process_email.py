@@ -8,7 +8,6 @@ from beagle import * # I'm sorry Jack
 import os
 import settings
 
-# open connection
 def get_emails():
     m = imaplib.IMAP4_SSL('imap.gmail.com')
     m.login(settings.EMAIL_USERNAME, settings.EMAIL_PASSWORD)
@@ -18,10 +17,14 @@ def get_emails():
     for item in data[0].split():
         resp, data = m.fetch(item, '(RFC822)')
         emails.append(data[0][1])
+        m.store(item, '+FLAGS', '\\Deleted')
 
     print len(emails)
+    m.expunge()
+    m.close()
+    m.logout()
     return emails
-# still need to delete emails
+
 
 def process_email(email):
     soup = BeautifulSoup(email)
