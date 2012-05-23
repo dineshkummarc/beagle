@@ -32,7 +32,7 @@
       <h4><span class="muted">DAU:</span> <strong>{{ game.dau }}</strong></h4>
       <h4><span class="muted">Ratings:</span> <strong>{{ game.ratings }}</strong></h4>
       <h4><span class="muted">Tags:</span> <strong>{% for tag in game.tags %} {{ tag.name }} {% endfor %}</strong></h4>
-      <h4><span class="muted">Integration Date:</span> <strong>{{ game.int_date }}</strong></h4>
+      <h4><span class="muted">Integration Date:</span> <strong>{{ game.int_date|datetime }}</strong></h4>
       <br>
     </div>
     {% endfor %}
