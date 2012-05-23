@@ -45,7 +45,7 @@ def make_chart_url():
 		percentages.append(user.values()[0])
 	percentages = ','.join(map(str, percentages))
 	users = '|'.join(map(str, users))
-	url = "https://chart.googleapis.com/chart?cht=p3&chd=t:%s&chs=350x150&chl=%s" % (percentages, users)
+	url = "https://chart.googleapis.com/chart?cht=p3&chd=t:%s&chs=400x100&chl=%s" % (percentages, users)
 	return url
 
 template = env.get_template('twibd.html')
