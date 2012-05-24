@@ -97,6 +97,7 @@ class ObjectLead:
 
         if e_lead:
             self.lead = e_lead
+            print "Lead already exists, skipping (%s)" % self.lead.developer
         
         else:
             self.lead.user = self.user
@@ -107,24 +108,34 @@ class ObjectLead:
 
         ## This is shit. Serious shit. ##
 
-        try:
-            self.contact.lead = self.lead
-            self.contact.lead_id = self.lead.id
-            db.session.add(self.contact)
-            db.session.commit()
+        games = self.lead.games
+        flagExists = False
+        for game in games:
+            if game.name == self.game.name:
+                print "Game already exists, skipping (%s)" % game.name
+                flagExists = True
+                break
 
-        except IntegrityError:
-            db.session.rollback()
-
-        try:
+        if  not flagExists:
             self.game.lead = self.lead
             self.game.lead_id = self.lead.id
             db.session.add(self.game)
             db.session.commit()
 
-        except IntegrityError:
-            db.session.rollback()
-        
+        contacts = self.lead.contacts
+        flagExists = False
+        for contact in contacts:
+            if contact.name == self.contact.name:
+                print "Contact already exists, skipping (%s)" % contact.name
+                flagExists = True
+                break
+
+        if not flagExists:
+            self.contact.lead = self.lead
+            self.contact.lead_id = self.lead.id
+            db.session.add(self.contact)
+            db.session.commit()
+
 if __name__ == '__main__':
     main()
         
