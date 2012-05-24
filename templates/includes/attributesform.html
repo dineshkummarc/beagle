@@ -1,3 +1,11 @@
+{% macro newattr(name) %}
+<form class="form-horizontal" autocomplete="off" action="{{ url_for('list_attributes') }}?type={{ name }}" method=POST>
+    <input type="text" name="name" placeholder="Insert New {{ name|capitalize }} Name"></input>
+    <input type="hidden" name="id"></input>
+    <button type="submit" class="btn">Create {{ name|capitalize }}</button>
+</form>
+{% endmacro %}
+
 <div class="well">
 <button class="btn-success btn" data-toggle="collapse" data-target="#status">Statuses</button>
 <div id="status" class="collapse">
@@ -9,6 +17,7 @@
 <button type="submit" class="btn btn-primary">Update Attributes</button>
 </form>
 {% endfor %}
+{{ newattr('status') }}
 </div>
 <br>
 <button class="btn-success btn" data-toggle="collapse" data-target="#age">Ages</button>
@@ -21,6 +30,7 @@
 <button type="submit" class="btn btn-primary">Update Attributes</button>
 </form>
 {% endfor %}
+{{ newattr('age') }}
 </div>
 <br>
 <button class="btn-success btn" data-toggle="collapse" data-target="#gender">Genders</button>
@@ -33,6 +43,7 @@
 <button type="submit" class="btn btn-primary">Update Attributes</button>
 </form>
 {% endfor %}
+{{ newattr('gender') }}
 </div>
 <br>
 <button class="btn-success btn" data-toggle="collapse" data-target="#tag">Tags</button>
@@ -45,6 +56,7 @@
 <button type="submit" class="btn btn-primary">Update Attributes</button>
 </form>
 {% endfor %}
+{{ newattr('tag') }}
 </div>
 <br>
 </div>

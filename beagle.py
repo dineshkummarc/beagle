@@ -609,18 +609,33 @@ def list_attributes():
         pass
     if request.method == 'POST':
         form = AttributeForm(request.form)
+
         if request.args.get('type') == 'status':
-            item = Status.query.get(form.id.data)
+            ret = edit_or_add_attributes(Status(name=form.name.data), id=form.id.data)
         if request.args.get('type') == 'age':
-            item = Age.query.get(form.id.data)
+            ret = edit_or_add_attributes(Age(name=form.name.data), id=form.id.data)
         if request.args.get('type') == 'gender':
-            item = Gender.query.get(form.id.data)
+            ret = edit_or_add_attributes(Gender(name=form.name.data), id=form.id.data)
         if request.args.get('type') == 'tag':
-            item = Tag.query.get(form.id.data)
-        item.name = form.name.data
-        db.session.commit()
-        flash('Succesfully update attribute %s' % item.name)
+            ret = edit_or_add_attributes(Tag(name=form.name.data), id=form.id.data)
+        
+        flash('Succesfully %s attribute' % ret)
     return render_template('attributes.html', attributes=get_attributes())
+
+
+def edit_or_add_attributes(obj, id):
+        
+    if id is not None:
+        item = obj.query.get(id)
+        item.name = obj.name
+        db.session.commit()
+        return "updated"
+    
+    else:
+        db.session.add(obj)
+        db.session.commit()
+        return "added"
+
 
 @app.route('/login/authorized')
 @facebook.authorized_handler
