@@ -2,12 +2,12 @@
 <form class="form-horizontal" autocomplete="off" action="{{ url_for('list_attributes') }}?type={{ name }}" method=POST>
     <input type="text" name="name" placeholder="Insert New {{ name|capitalize }} Name"></input>
     <input type="hidden" name="id"></input>
-    <button type="submit" class="btn">Create {{ name|capitalize }}</button>
+    <button type="submit" class="btn btn-success">Create {{ name|capitalize }}</button>
 </form>
 {% endmacro %}
 
 <div class="well">
-<button class="btn-success btn" data-toggle="collapse" data-target="#status">Statuses</button>
+<button class="btn" data-toggle="collapse" data-target="#status">Statuses</button>
 <div id="status" class="collapse">
 <br>
 {% for item in attributes.get('statuses') %}
@@ -20,7 +20,7 @@
 {{ newattr('status') }}
 </div>
 <br>
-<button class="btn-success btn" data-toggle="collapse" data-target="#age">Ages</button>
+<button class="btn" data-toggle="collapse" data-target="#age">Ages</button>
 <div id="age" class="collapse">
 <br>
 {% for item in attributes.get('ages') %}
@@ -33,7 +33,7 @@
 {{ newattr('age') }}
 </div>
 <br>
-<button class="btn-success btn" data-toggle="collapse" data-target="#gender">Genders</button>
+<button class="btn" data-toggle="collapse" data-target="#gender">Genders</button>
 <div id="gender" class="collapse">
 <br>
 {% for item in attributes.get('genders') %}
@@ -46,7 +46,7 @@
 {{ newattr('gender') }}
 </div>
 <br>
-<button class="btn-success btn" data-toggle="collapse" data-target="#tag">Tags</button>
+<button class="btn" data-toggle="collapse" data-target="#tag">Tags</button>
 <div id="tag" class="collapse">
 <br>
 {% for item in attributes.get('tags') %}
