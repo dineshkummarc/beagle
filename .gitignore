@@ -5,3 +5,4 @@ Vagrantfile
 *.pyc
 test.db
 sample_email
+*.csv*

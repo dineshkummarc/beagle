@@ -81,7 +81,7 @@ class Lead(db.Model):
 
     user = db.relationship(User, backref='leads', lazy='joined')
 
-    def __init__(self, developer=developer, website=website, user_id=user_id, tags=[], note=None, id=None):
+    def __init__(self, developer=None, website=None, user_id=None, tags=[], note=None, id=None):
         if id is None:
             self.id = str(uuid.uuid4()).replace('-', '')
         self.developer = developer
@@ -104,7 +104,7 @@ class Contact(db.Model):
 
     lead = db.relationship(Lead, backref='contacts', lazy='joined')
 
-    def __init__(self, lead_id=lead_id, name=name, email=email, phone=phone, title=title, tags=[], id=None):
+    def __init__(self, lead_id=None, name=None, email=None, phone=None, title=None, tags=[], id=None):
         if id is None:
             self.id = str(uuid.uuid4()).replace('-', '')
         self.lead_id = lead_id
@@ -132,7 +132,7 @@ class Game(db.Model):
     lead = db.relationship(Lead, backref='games', lazy='joined')
     int_date = db.Column(db.DateTime, index=True)
 
-    def __init__(self, name=name, lead_id=lead_id, ratings=ratings, platform=platform, ages=ages, genders=genders, statuses=statuses, tags=[], int_date=int_date, dau=None, id=None):
+    def __init__(self, name=None, lead_id=None, ratings=0, platform=None, ages=[], genders=[], statuses=[], tags=[], int_date=None, dau=None, id=None):
         if id is None:
             self.id = str(uuid.uuid4()).replace('-', '')
         self.name = name
@@ -144,7 +144,7 @@ class Game(db.Model):
         self.statuses = statuses
         self.tags = tags
         self.int_date = int_date
-        if dau is None:
+        if dau is 0:
             self.dau = int(self.ratings * float(settings.RATINGS_MULTIPLIER))
 
 class Age(db.Model):
@@ -468,6 +468,7 @@ def update_game():
         game.statuses = statuses
         game.tags = tags
         game.platform = form.platform.data
+
         game.lead_id = form.lead_id.data
         if game.int_date == None:
             pass
