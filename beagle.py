@@ -222,10 +222,6 @@ class AttributeForm(Form):
     name = TextField('name')
     id = IntegerField('id')
 
-class AttributeForm(Form):
-    name = TextField('name')
-    id = IntegerField('id')
-
 # oauth settings (this can be pretty easily swapped out for twitter/github/etc.)
 
 facebook = oauth.remote_app('facebook',
