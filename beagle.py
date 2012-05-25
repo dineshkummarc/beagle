@@ -296,41 +296,53 @@ def search():
 def browse():
     args = request.args
     games = []
-    if request.method == 'GET' and args:
-        genders = args.getlist('genders')
-        ages = args.getlist('ages')
-        statuses = args.getlist('statuses')
+    if request.method == 'GET':
+        if args.get('action') == 'all':
+            print "here"
+            games = Game.query.all()
+            return render_template('browse.html', games=games, args=args, attributes=get_attributes())
 
-        all_sets = []
-        if not len(ages) == 0:
-            age_ids = []
-            for age in ages:
-                age_obj = Age.query.filter_by(name=age).first()
-                age_ids.append(age_obj.id)
-            age_set = Game.query.join('ages').filter(Age.id.in_(age_ids)).distinct().all()
-            all_sets.append(set(age_set))
-        if not len(genders) == 0:
-            gen_ids = []
-            for gender in genders:
-                gen_obj = Gender.query.filter_by(name=gender).first()
-                gen_ids.append(gen_obj.id)
-            gen_set = Game.query.join('genders').filter(Gender.id.in_(gen_ids)).distinct().all()
-            all_sets.append(set(gen_set))
-        if not len(statuses) == 0:
-            stat_ids = []
-            for status in statuses:
-                stat_obj = Status.query.filter_by(name=status).first()
-                stat_ids.append(stat_obj.id)
-            stat_set = Game.query.join('statuses').filter(Status.id.in_(stat_ids)).distinct().all()
-            all_sets.append(set(stat_set))
-        result = set.intersection(*all_sets)
-        games = result
-        return render_template('browse.html', games=games, args=args, attributes=get_attributes())
+        elif args.get('action') == 'search':
+            print "search"
+        
+            genders = args.getlist('genders')
+            ages = args.getlist('ages')
+            statuses = args.getlist('statuses')
 
-    elif request.method == 'GET':
-        games = Game.query.all()
-        return render_template('browse.html', games=games, args=args, attributes=get_attributes())
-    return render_template('browse.html', args=args, attributes=get_attributes())
+            all_sets = []
+            if not len(ages) == 0:
+                age_ids = []
+                for age in ages:
+                    age_obj = Age.query.filter_by(name=age).first()
+                    age_ids.append(age_obj.id)
+                age_set = Game.query.join('ages').filter(Age.id.in_(age_ids)).distinct().all()
+                all_sets.append(set(age_set))
+            if not len(genders) == 0:
+                gen_ids = []
+                for gender in genders:
+                    gen_obj = Gender.query.filter_by(name=gender).first()
+                    gen_ids.append(gen_obj.id)
+                gen_set = Game.query.join('genders').filter(Gender.id.in_(gen_ids)).distinct().all()
+                all_sets.append(set(gen_set))
+            if not len(statuses) == 0:
+                stat_ids = []
+                for status in statuses:
+                    stat_obj = Status.query.filter_by(name=status).first()
+                    stat_ids.append(stat_obj.id)
+                stat_set = Game.query.join('statuses').filter(Status.id.in_(stat_ids)).distinct().all()
+                all_sets.append(set(stat_set))
+            
+            try:
+                result = set.intersection(*all_sets)
+                games = result
+                return render_template('browse.html', games=games, args=args, attributes=get_attributes())
+
+            except:
+                return render_template('browse.html', args=args, attributes=get_attributes())
+
+        else:
+            print "nvm"
+            return render_template('browse.html', args=args, attributes=get_attributes())
 
 @app.route("/add/lead", methods=['POST'])
 @auth_required('user')

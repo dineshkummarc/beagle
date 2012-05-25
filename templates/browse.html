@@ -21,7 +21,8 @@
           {% endfor %}
         </select><span class="help-inline muted">Status</span>
         <br><br>
-        <button type="submit" class="btn btn-primary">Search the Beagle</button>
+        <button type="submit" class="btn btn-primary" name="action" value="search">Search the Beagle</button>
+        <button type="submit" class="btn" name="action" value="all"> View all results</button>
     </form>
 {% if games %}
 <div class="row">
