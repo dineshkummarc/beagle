@@ -298,16 +298,15 @@ def browse():
     games = []
     if request.method == 'GET':
         if args.get('action') == 'all':
-            print "here"
             games = Game.query.all()
             return render_template('browse.html', games=games, args=args, attributes=get_attributes())
 
         elif args.get('action') == 'search':
-            print "search"
         
             genders = args.getlist('genders')
             ages = args.getlist('ages')
             statuses = args.getlist('statuses')
+            tags = args.getlist('tags')
 
             all_sets = []
             if not len(ages) == 0:
@@ -331,6 +330,13 @@ def browse():
                     stat_ids.append(stat_obj.id)
                 stat_set = Game.query.join('statuses').filter(Status.id.in_(stat_ids)).distinct().all()
                 all_sets.append(set(stat_set))
+            if not len(tags) == 0:
+                tag_ids = []
+                for tag in tags:
+                    tag_obj = Tag.query.filter_by(name = tag).first()
+                    tag_ids.append(tag_obj.id)
+                tag_set = Game.query.join('tags').filter(Tag.id.in_(tag_ids)).distinct().all()
+                all_sets.append(set(tag_set))
             
             try:
                 result = set.intersection(*all_sets)
@@ -341,7 +347,6 @@ def browse():
                 return render_template('browse.html', args=args, attributes=get_attributes())
 
         else:
-            print "nvm"
             return render_template('browse.html', args=args, attributes=get_attributes())
 
 @app.route("/add/lead", methods=['POST'])
