@@ -5,6 +5,7 @@
   <div class="about span8">
     <h1 class="muted"><a href="http://ax.search.itunes.apple.com/WebObjects/MZSearch.woa/wa/search?entity=software&amp;media=all&amp;restrict=true&amp;submit=seeAllLockups&amp;term={{ lead.developer }}">{{ lead.developer }}</a></h1>
     <h6>Website: <strong><a href="http://{{ lead.website }}">{{ lead.website }}</a></strong></h6>
+    <h6>Ping Date: <strong>{{ lead.ping_date|datetime }}</strong></h6>
     <h6>Notes:</h6>
     <p>{{ lead.note }}</p>
   </div>

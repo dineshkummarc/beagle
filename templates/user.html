@@ -13,6 +13,7 @@
           <th class="blue">Games</th>
           <th class="blue"># Games</th>
           <th class="blue">Contacts</th>
+          <th class="blue">Ping Date</th>
         </tr>
   </thead>
   <tbody>
@@ -22,6 +23,7 @@
             <td>{% for game in lead.games %}<a href="/lead/{{ game.lead_id }}#{{ game.id }}">{{ game.name }}</a> {% endfor %}</td>
             <td>{{ lead.games|length }}</td>
             <td>{% for contact in lead.contacts %}<a href="/lead/{{ contact.lead_id }}#{{ contact.id }}">{{ contact.name }}</a> {% endfor %}</td>
+            <td>{{ lead.ping_date|datetime }}</td>
           </tr>
   {% endfor %}
   </tbody>

@@ -78,15 +78,17 @@ class Lead(db.Model):
     note = db.Column(db.Text)
     user_id = db.Column(db.String(36), db.ForeignKey('user.id'))
     tags = db.relationship('Tag', secondary=lead_tags, backref=db.backref('leads', lazy='dynamic'))
+    ping_date = db.Column(db.DateTime, index=True)
 
     user = db.relationship(User, backref='leads', lazy='joined')
 
-    def __init__(self, developer=None, website=None, user_id=None, tags=[], note=None, id=None):
+    def __init__(self, developer=None, website=None, user_id=None, ping_date=None, tags=[], note=None, id=None):
         if id is None:
             self.id = str(uuid.uuid4()).replace('-', '')
         self.developer = developer
         self.website = website
         self.note = note
+        self.ping_date = ping_date
         self.user_id = user_id
         self.tags = tags
 
@@ -194,6 +196,7 @@ class LeadForm(Form):
     developer = TextField('developer')
     website = TextField('website')
     note = TextField('note')
+    ping_date = TextField('ping_date')
     user_id = TextField('user_id')
     tags = SelectMultipleField('tags')
 
@@ -302,7 +305,7 @@ def browse():
             return render_template('browse.html', games=games, args=args, attributes=get_attributes())
 
         elif args.get('action') == 'search':
-        
+
             genders = args.getlist('genders')
             ages = args.getlist('ages')
             statuses = args.getlist('statuses')
@@ -337,7 +340,7 @@ def browse():
                     tag_ids.append(tag_obj.id)
                 tag_set = Game.query.join('tags').filter(Tag.id.in_(tag_ids)).distinct().all()
                 all_sets.append(set(tag_set))
-            
+
             try:
                 result = set.intersection(*all_sets)
                 games = result
@@ -354,7 +357,8 @@ def browse():
 def add_lead():
     form = LeadForm(request.form)
     if request.method == 'POST' and form.validate():
-        lead = Lead(form.developer.data, strip_http(form.website.data), session['user'])
+        date = parse(form.ping_date.data)
+        lead = Lead(form.developer.data, strip_http(form.website.data), session['user'], date)
         try:
             db.session.add(lead)
             db.session.commit()
@@ -434,8 +438,10 @@ def update_lead():
         lead.website = strip_http(form.website.data)
         lead.user_id = form.user_id.data
         lead.note = str(form.note.data)
+        lead.ping_date = parse(form.ping_date.data)
 
         tags = []
+
         for item in form.tags.data:
             tag = Tag.query.filter_by(name=item).first()
             tags.append(tag)
@@ -635,19 +641,19 @@ def list_attributes():
             ret = edit_or_add_attributes(Gender(name=form.name.data), id=form.id.data)
         if request.args.get('type') == 'tag':
             ret = edit_or_add_attributes(Tag(name=form.name.data), id=form.id.data)
-        
+
         flash('Succesfully %s attribute' % ret)
     return render_template('attributes.html', attributes=get_attributes())
 
 
 def edit_or_add_attributes(obj, id):
-        
+
     if id is not None:
         item = obj.query.get(id)
         item.name = obj.name
         db.session.commit()
         return "updated"
-    
+
     else:
         db.session.add(obj)
         db.session.commit()

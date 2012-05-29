@@ -21,6 +21,8 @@
   <br>
   <textarea rows="6" name="note" class="span6">{{ lead.note }}</textarea><span class="help-inline muted">Notes for the lead</span>
   <br>
+  <input type="text" name="ping_date" value="{{ lead.ping_date }}"><span class="help-inline muted">Ping Date</span>
+  <br>
   <button type="submit" class="btn btn-primary">Send Changes</button>
   <a href="/lead/{{ lead.id }}" class="btn">Cancel</a>
 </form>
