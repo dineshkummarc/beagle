@@ -6,3 +6,4 @@ Vagrantfile
 test.db
 sample_email
 *.csv*
+provision.sh
