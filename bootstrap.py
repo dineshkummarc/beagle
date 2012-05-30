@@ -41,7 +41,7 @@ def fill_db():
         user = User.query.filter_by(name = userc).first()
         leadprefix = random.choice(lead_name_prefix)
         leadname = random.choice(game_name_prefix)+" " +leadprefix+" "+random.choice(lead_name_postfix)
-        lead = Lead(leadname, 'dev@%s.com' % leadprefix, user.id)
+        lead = Lead(leadname, 'dev@%s.com' % leadprefix, user.id, datetime.date.today())
         leads.append(lead)
         db.session.add(lead)
         db.session.commit()

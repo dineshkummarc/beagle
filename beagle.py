@@ -78,7 +78,7 @@ class Lead(db.Model):
     note = db.Column(db.Text)
     user_id = db.Column(db.String(36), db.ForeignKey('user.id'))
     tags = db.relationship('Tag', secondary=lead_tags, backref=db.backref('leads', lazy='dynamic'))
-    ping_date = db.Column(db.DateTime, index=True)
+    ping_date = db.Column(db.Date, index=True)
 
     user = db.relationship(User, backref='leads', lazy='joined')
 

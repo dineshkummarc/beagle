@@ -1,0 +1,29 @@
+<html>
+<div><strong>Here are your leads to ping today:</strong></div>
+<br>
+{% if leads %}
+<table width="900">
+  	<thead style="color: gray; text-align: left;">
+		<tr>
+          <th >Developer</th>
+          <th># Games</th>
+          <th>Contacts</th>
+          <th>Notes</th>
+		</tr>
+	</thead>
+	<tbody>
+		{% for lead in leads %}
+		<tr style="border: 1px solid gray;">
+            <td><a href="/lead/{{ lead.id }}">{{ lead.developer }}</a></td>
+            <td>{{ lead.games|length }}</td>
+            <td>{% for contact in lead.contacts %}<a href="mailto:{{ contact.email }}">{{ contact.name }}</a> {% endfor %}</td>
+            <td>{{ lead.note }}</td>
+        </tr>
+		{% endfor %}
+    </tbody>
+</table>
+{% else %}
+No leads to ping. Work harder!
+{% endif %}
+<br>
+</html>
