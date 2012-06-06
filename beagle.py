@@ -146,7 +146,7 @@ class Game(db.Model):
         self.statuses = statuses
         self.tags = tags
         self.int_date = int_date
-        if dau is 0:
+        if dau is None:
             self.dau = int(self.ratings * float(settings.RATINGS_MULTIPLIER))
 
 class Age(db.Model):
