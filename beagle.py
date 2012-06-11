@@ -392,6 +392,11 @@ def add_game():
             tags.append(tag)
 
         date = parse(form.int_date.data)
+        if not form.ratings.data:
+            form.ratings.data = 0
+        if not form.name.data:
+            flash('Your game must have a name to be added.', 'alert-danger')
+            return redirect('/lead/%s' % form.lead_id.data)
         game = Game(form.name.data, form.lead_id.data, form.ratings.data, form.platform.data, ages, genders, statuses, tags, date)
         try:
             db.session.add(game)
